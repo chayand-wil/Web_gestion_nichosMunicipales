@@ -1,4 +1,5 @@
 <?php
+
   session_start();
 
 
@@ -15,24 +16,26 @@ class adminControlador{
     private $reportes;
     private $condicionRep = 1 ;
    
-    private $menu = "publicaciones" ;
+    private $menu = "usuarios" ;
     private $submenu = "listar" ;
     private $reportesUsers;
     
     
     private $userss;
     
-
-
-
+ 
     public function __CONSTRUCT(){
         $this->modelo2 = new User;
 
 
     }
+ 
+
+ 
 
 
-    
+
+
     public function Inicio(){
         // $this->filtrarPublications($this->filtro);
 
@@ -45,6 +48,7 @@ class adminControlador{
                 if(isset($_SESSION['menu'])){
                      $this->menu = $_SESSION['menu'] ; 
                 }
+
                 if(isset($_GET['menu'])){
                      $_SESSION['menu'] = $_GET['menu'];   
                      $this->menu = $_SESSION['menu'] ; 
@@ -79,7 +83,7 @@ class adminControlador{
 
     public function filtrar(){
         $this->identificarFiltros();
-
+        
         $_SESSION['titulo'] = $this->titulo;
 
         require_once "vista/users/admin/index.php"; 
@@ -87,7 +91,7 @@ class adminControlador{
     }
     
 
-    public function eliminarUserC(){
+    public function eliminarUserC(){ 
         // var_dump('');
         // exit;
 
@@ -108,8 +112,8 @@ class adminControlador{
 
         switch($this->filtro){
             case 1:
-            $this->titulo = "Agregar un usuario";
-            $this->submenu = "agregar";
+                $this->titulo = "Agregar un usuario";
+                $this->submenu = "agregar";
             break;
             case 2:
                 $this->titulo = "Usuarios disponibles";
@@ -117,23 +121,44 @@ class adminControlador{
                 
                 break;
                 
-                case 3:
-                    $this->titulo = "Vencidas";
-                    
-                    break;
-                    case 4:
-                        $this->titulo = "Rechazadas";
-                        
-                        break;
-                        case 5:
-                            $this->titulo = "Reportadas";
-                            
-                            break;
-                            case 6:
-                                $this->titulo = "Ocultas";
 
-                            break;
         }
+
+    }
+
+    public function identificarMenu() {
+        $this->menu = $_SESSION['menu'];
+        $this->filtro = $_GET['filtro'];
+
+        switch($this->filtro){
+            case 1:
+                $this->titulo = "Ver nichos";
+                $this->submenu = "nichos";
+
+            break;
+            case 2:
+                $this->titulo = "Solicitudes de ocupaciones";
+                $this->submenu = "ocupaciones";
+                
+                break;
+            case 3:
+                $this->titulo = "Solicitudes de exhumaciones";
+                $this->submenu = "exhumaciones";
+                
+                break;
+                
+        }
+
+
+        $_SESSION['titulo'] = $this->titulo;
+
+        // var_d    ump("menu " . $this->menu);
+        // var_dump("submenu " . $this->submenu);
+        // var_dump("titulo " . $this->titulo);
+
+        // exit;
+
+        require_once "vista/users/admin/index.php"; 
 
     }
 

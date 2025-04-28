@@ -1,9 +1,7 @@
 <?php session_start(); ?>
 
 
-
 <?php include '/opt/lampp/htdocs/Web_gestion_nichosMunicipales/vista/users/header.php' ?>
-
 
  
 <!DOCTYPE html>
@@ -11,9 +9,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoreo Trafico</title>
     <link rel="stylesheet" href="assets/css/styles2.css">
-
     
     <style>
         .mensaje-registro {
@@ -92,9 +88,7 @@
     .mensaje-exito.active {
     display: block;
     }
-
-
-
+ 
 
     </style>
 
@@ -102,10 +96,10 @@
 
 </head>
 
+
+
+
 <body>
-
-
-
 
 
 <?php    include 'vista/users/admin/header.php'; ?>
@@ -118,22 +112,27 @@
         <?php unset($_SESSION['mensaje_registro']); // Eliminar el mensaje después de mostrarlo ?>
 <?php endif; ?>
 
+<br>
+<br>
+<br>
+<br>
+<br> 
 
-
-<?php if($this->menu == "publicaciones"):?>
-    <h2>Gestionar usuarios</h2>
+<?php if($this->menu == "usuarios"):?>
     <?php    include 'gestionar_usuarios.php'; ?>
     
-
-    <?php elseif($this->menu == "usuarios"):?>
-<h1>Control de calles/avenidas/semaforos</h1>
-        <?php    include 'calles_ave.php'; ?>
+    
+    <?php elseif($this->menu == "nichos"):?>
+<?php    include 'gestion_nichos.php'; ?>
     
         
         
+<?php elseif($this->menu == "contratos"):?>
+<?php    include 'reportes_g.php'; ?>
+
+
 <?php elseif($this->menu == "reportes"):?>
-    <h1>Reportes</h1>
-    <?php    include 'reportes_g.php'; ?>
+<?php    include 'reportes_g.php'; ?>
 
             
 

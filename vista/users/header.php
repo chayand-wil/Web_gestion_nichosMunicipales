@@ -1,6 +1,7 @@
 <?php
 // Inicia la sesión si es necesario
 session_start();
+
 ?>
 
 <!DOCTYPE html>
@@ -8,7 +9,6 @@ session_start();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitoreo</title>
     <!-- Font Awesome CDN -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -20,7 +20,7 @@ session_start();
         /* Estilos   generales de la página */
 body {
     margin: 0;
-    padding: 0;
+    padding: 0; 
     color: #333;
     padding-top: 0px;
     font-family: Arial, sans-serif;
@@ -39,7 +39,12 @@ header {
     background: linear-gradient(to right, #001b4e, #003a7c);
     padding: 10px 20px;
     box-sizing: border-box; /* Asegura que el padding no afecte el tamaño */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
 }
+
 
 /* Contenedor para los íconos del lado derecho */
 .header-right {
@@ -102,10 +107,7 @@ header {
 }
 
 
-
-
-
-
+ 
 
 /* Contenedor del menú desplegable */
 .dropdown {
@@ -176,19 +178,11 @@ header {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 </style>
+
+
+
+
 
 <header>
     <div  class="logo">
@@ -210,31 +204,45 @@ header {
             $roll = 'Usuario';
         }
     
-    ?>
-
-
+    ?>     
     <p style="color: #c2dfff;"> <?= $roll?>:   <?= $_SESSION['username']?></p></div>
+
+
+
+
+<?php if($this->menu == "usuarios"):?>
+    <h2 style="color: #d1e7dd;">Gestionar usuarios</h2>
+
+<?php elseif($this->menu == "nichos"):?>
+        <h1 style="color: #d1e7dd;">Sobre los nichos</h1>
+        
+        
+<?php elseif($this->menu == "contratos"):?>
+    <h1 style="color: #d1e7dd;">Contratos</h1>
+
+<?php elseif($this->menu == "reportes"):?>
+    <h1 style="color: #d1e7dd;">Reportes</h1>
+
+
+<?php endif; ?>
 
 
 
    <div class="tipo-publico">
                 <select id="tipoPublicoSelect">
-                    <option value="publicaciones" <?php  echo ($this->menu === 'publicaciones') ? 'selected' : ''; ?>>Gestionar usuarios</option>
-                    <option value="usuarios" <?php  echo ($this->menu === 'usuarios') ? 'selected' : ''; ?> >Control de calles/avenidas/semaforos</option>
-                    <option value="reportes"  <?php  echo ($this->menu === 'reportes') ? 'selected' : ''; ?> >Reportes u otra cosa</option>
+                    <option value="usuarios" <?php  echo ($this->menu === 'usuarios') ? 'selected' : ''; ?>>Gestionar usuarios</option>
+                    <option value="nichos" <?php  echo ($this->menu === 'nichos') ? 'selected' : ''; ?> >Control nichos</option>
+                    <option value="contratos"  <?php  echo ($this->menu === 'contratos') ? 'selected' : ''; ?> >Contratos</option>
+                    <option value="reportes"  <?php  echo ($this->menu === 'reportes') ? 'selected' : ''; ?> >Reportes y estadisticas</option>
                 </select>
-            </div> <!-- Botón antes de los íconos -->
+    </div> <!-- Botón antes de los íconos -->
 
     <div class="header-right">
-        
-        <a href="?c=user_reg">
-            
+        <a href="?c=user_reg">            
             <img src="assets/img/logo.png" alt="Logo" style="height: 40px;">
         </a>
 
-
-        <a href="?c=admin&menu=publicaciones">
-
+        <a href="?c=admin&menu=usuarios">
             <button  class="header-button">Home</button>
         </a>
 
@@ -247,67 +255,6 @@ header {
 
 
  
-<style>
-    /* Contenedor del menú desplegable */
-    .dropdown {
-        position: relative;
-        left: 550px;
-    }
-
-    /* Botón del menú desplegable */
-
- 
-.dropdown-btn {
-    background-color: #ffffff;
-    color: #003a7c;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: background-color 0.2s ease;
-    margin-right: 10px; /* Ajusta este valor según lo que necesites */
-}
-
-    .dropdown-btn:hover {
-        background-color: #f0f0f0;
-    }
-
-    /* Lista desplegable */
-    .dropdown-menu {
-        display: none;
-        position: absolute;
-        top: 45px;
-        right: 0;
-        background-color: white;
-        border-radius: 5px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        z-index: 10;
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        overflow: hidden;
-    }
-
-    .dropdown-menu li {
-        padding: 10px 20px;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-    }
-
-    .dropdown-menu li:hover {
-        background-color: #f0f0f0;
-    }
-
-    /* Mostrar el menú al hacer clic */
-    .dropdown.show .dropdown-menu {
-        display: block;
-    }
-</style>
-
 
 
 <script>
