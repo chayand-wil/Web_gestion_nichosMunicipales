@@ -8,8 +8,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nichos Quetzaltenango - Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/styles.css"> <!-- Enlace al archivo CSS externo -->
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    
     <style>
 
 
@@ -41,13 +42,13 @@
 
 
 
-    </style>
+</style>
 </head>
 <body>
     <div class="min-vh-100 d-flex justify-content-center align-items-center">
         <div class="login-container">
             <div class="logo-container">
-                <img src="assets/img/logo.png" alt="Ola Ke Hace Logo">
+                <img src="assets/img/logo2.png" alt="Ola Ke Hace Logo">
             </div>
             <h2 class="text-center mb-4">Nichos Municipales </h2>
             

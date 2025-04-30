@@ -13,10 +13,10 @@
         // Preparar la consulta solo con el username
         $stmt = $this->pdo->prepare("
             SELECT *
-            FROM usuario
-            WHERE username = :username;
+            FROM user
+            WHERE mail = :user;
         ");
-        $stmt->bindParam(':username', $username, PDO::PARAM_STR);
+        $stmt->bindParam(':user', $username, PDO::PARAM_STR);
     
         // Ejecutar la consulta
         $stmt->execute();

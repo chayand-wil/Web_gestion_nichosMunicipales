@@ -8,7 +8,7 @@ class database{
    const servidor = "localhost"; 
    const  usuariobd = "root";
    const  clave = "";
-   const  nombrebd = "monitoreo_chayand";
+   const  nombrebd = "sistema_nichos_chayand";
 //    const  nombrebd = "bd_olake";
 //    const servidor = "localhost"; 
 //    const  usuariobd = "root";

@@ -1,0 +1,38 @@
+backups bloques
+
+
+            <?php foreach ($this->estadoNicho as $estadon): ?>
+                    <option value="<?php echo htmlspecialchars($estadon); ?>"
+                        <?php echo ($this->estadoNicho === $estadon) ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($estadon); ?>
+                    </option>
+            <?php endforeach; ?>
+
+
+
+
+
+
+            <div class="tipo-publico">
+                <label for="tipoPublicoSelect"><h3>Calle</h3></label>
+                <select id="tipoPublicoSelect2">
+                    <option value="familiar" <?php  echo ($this->filtroPublico === 'familiar') ? 'selected' : ''; ?>>Todo público</option>
+                    <option value="adulto" <?php  echo ($this->filtroPublico === 'adulto') ? 'selected' : ''; ?> >Adulto</option>
+                    <option value="infantil"  <?php  echo ($this->filtroPublico === 'infantil') ? 'selected' : ''; ?> >Infantil</option>
+
+                 
+                </select>
+
+
+                
+
+            </div>          
+
+            <div class="tipo-publico">
+                <label for="tipoPublicoSelect"><h3>Avenida</h3></label>
+                <select id="tipoPublicoSelect3">
+                    <option value="familiar" <?php  echo ($this->filtroPublico === 'familiar') ? 'selected' : ''; ?>>Todo público</option>
+                    <option value="adulto" <?php  echo ($this->filtroPublico === 'adulto') ? 'selected' : ''; ?> >Adulto</option>
+                    <option value="infantil"  <?php  echo ($this->filtroPublico === 'infantil') ? 'selected' : ''; ?> >Infantil</option>
+                </select>
+            </div>

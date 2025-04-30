@@ -1,196 +1,266 @@
- DROP DATABASE IF EXISTS monitoreo_chayand;
-CREATE DATABASE monitoreo_chayand;
-USE monitoreo_chayand;
+-- Creación de la base de datos
+DROP DATABASE if EXISTS sistema_nichos_chayand;
 
-CREATE TABLE departamento (
+CREATE DATABASE IF NOT EXISTS sistema_nichos_chayand;
+
+
+USE sistema_nichos_chayand;
+
+-- Tabla pais (guatemala)
+CREATE TABLE pais (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL
+    nombre VARCHAR(100) NOT NULL
 );
 
+-- Tabla departamento (quetzaltenango)
+CREATE TABLE departamento (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    id_pais INT NOT NULL,
+    FOREIGN KEY (id_pais) REFERENCES pais(id)
+);
+
+-- Tabla municipio (Almolonga, Cabrican)
 CREATE TABLE municipio (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL,
-    id_departamento INT,
+    nombre VARCHAR(100) NOT NULL,
+    id_departamento INT NOT NULL,
     FOREIGN KEY (id_departamento) REFERENCES departamento(id)
 );
 
-CREATE TABLE zona (
+-- Tabla estado_boleta (pendiente de pago, pendiente de verificacion, verificado)
+CREATE TABLE estado_boleta (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    id_municipio INT,
+    estado VARCHAR(50) NOT NULL
+);
+
+-- Tabla estado_contrato (borrador, revision, vigente, vencido, suspendido)
+CREATE TABLE estado_contrato (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    estado VARCHAR(50) NOT NULL
+);
+
+-- Tabla causa_fallecimiento (Cardiovasculares, Respiratorias pulmón, Cánceres, Infecciosas, Causas externas, Otras enfermedades)
+CREATE TABLE causa_fallecimiento (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    causa VARCHAR(100) NOT NULL
+);
+
+-- Tabla rol_user (admin, assistant, auditor, user)
+CREATE TABLE rol_user (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    rol VARCHAR(50) NOT NULL
+);
+
+-- Tabla tipo_nicho (adulto, ninio, historico)
+CREATE TABLE tipo_nicho (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    tipo VARCHAR(50) NOT NULL
+);
+
+-- Tabla estado_nicho (ocupado, disponible, proceso_exumacion)
+CREATE TABLE estado_nicho (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    estado VARCHAR(50) NOT NULL
+);
+
+-- Tabla ente_autorizador (ministerio_salud, orden_judicial)
+CREATE TABLE ente_autorizador (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL
+);
+
+-- Tabla estado_solicitud (sin revision, aceptada, rechazada)
+CREATE TABLE estado_solicitud (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    estado VARCHAR(50) NOT NULL
+);
+
+-- Tabla motivoExhumacion (Judiciales, Científicos, Familiares, Administrativos)
+CREATE TABLE motivoExhumacion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    motivo VARCHAR(100) NOT NULL
+);
+
+-- Tabla calle
+CREATE TABLE calle (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    numero INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL
+);
+
+-- Tabla avenida
+CREATE TABLE avenida (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    numero INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL
+);
+
+-- Tabla persona
+CREATE TABLE persona (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    primer_nombre VARCHAR(50) NOT NULL,
+    segundo_nombre VARCHAR(50),
+    primer_apellido VARCHAR(50) NOT NULL,
+    segundo_apellido VARCHAR(50),
+    dpi VARCHAR(20) UNIQUE NOT NULL,
+    fecha_cumpleanos DATE,
+    direccion TEXT NOT NULL,
+    id_municipio INT NOT NULL,
     FOREIGN KEY (id_municipio) REFERENCES municipio(id)
 );
 
-CREATE TABLE calle_avenida (
+-- Tabla user
+CREATE TABLE user (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    id_zona INT,
-    cantidad_autos_salientes INT,
-    longitud_calle FLOAT,
-    cantidad_carriles INT,
-    FOREIGN KEY (id_zona) REFERENCES zona(id)
-);
-
-CREATE TABLE auto (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    longitud FLOAT,
-    ancho FLOAT,
-    color VARCHAR(50),
-    id_calle_origen INT,
-    id_calle_destino INT,
-    FOREIGN KEY (id_calle_origen) REFERENCES calle_avenida(id),
-    FOREIGN KEY (id_calle_destino) REFERENCES calle_avenida(id)
-);
-
-CREATE TABLE semaforo (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_calle_avenida INT,
-    tiempo_verde INT,
-    tiempo_amarrillo INT,
-    FOREIGN KEY (id_calle_avenida) REFERENCES calle_avenida(id)
-);
-
-CREATE TABLE estado (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE rol (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL
-);
-
-CREATE TABLE usuario (
-    id_cui INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) UNIQUE NOT NULL,
+    mail VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    nombres VARCHAR(100) NOT NULL,
-    apellidos VARCHAR(100) NOT NULL,
-    calle_avenida_asignada INT,
-    id_rol INT,
-    id_estado INT,
-    FOREIGN KEY (calle_avenida_asignada) REFERENCES calle_avenida(id),
-    FOREIGN KEY (id_rol) REFERENCES rol(id),
-    FOREIGN KEY (id_estado) REFERENCES estado(id)
+    id_rol INT NOT NULL,
+    FOREIGN KEY (id_rol) REFERENCES rol_user(id)
 );
 
-CREATE TABLE sesion (
+-- Tabla ubicacion_nicho
+CREATE TABLE ubicacion_nicho (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT,
-    tiempo_sesion INT,
-    cantidad_pruebas_realizadas INT,
-    fecha DATE,
-    hora_inicio DATETIME,
-    hora_fin DATETIME,
-    FOREIGN KEY (id_usuario) REFERENCES usuario(id_cui)
+    id_calle INT NOT NULL,
+    id_avenida INT NOT NULL,
+    FOREIGN KEY (id_calle) REFERENCES calle(id),
+    FOREIGN KEY (id_avenida) REFERENCES avenida(id)
 );
 
-CREATE TABLE reportes (
+-- Tabla nicho
+CREATE TABLE nicho (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    id_usuario INT,
-    contenido TEXT,
-    FOREIGN KEY (id_usuario) REFERENCES usuario(id_cui)
+    codigo VARCHAR(50) UNIQUE NOT NULL,
+    id_estado_nicho INT NOT NULL,
+    id_tipo_nicho INT NOT NULL,
+    id_ubicacion INT NOT NULL,
+    nivel INT NOT NULL,
+    FOREIGN KEY (id_estado_nicho) REFERENCES estado_nicho(id),
+    FOREIGN KEY (id_tipo_nicho) REFERENCES tipo_nicho(id),
+    FOREIGN KEY (id_ubicacion) REFERENCES ubicacion_nicho(id)
 );
 
-CREATE TABLE emulacion (
+-- Tabla responsable_nicho
+CREATE TABLE responsable_nicho (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    id_sesion INT,
-    fecha DATE,
-    hora TIME,
-    id_semaforo INT,
-    id_usuario INT,
-    cantidad_autosTotales INT,
-    cantidad_acciones_realizadas INT,
-    tiempo_promedio_cruce FLOAT,
-    congestion_promedio FLOAT,
-    eficiencia_semaforo FLOAT,
-    tiempo_espera INT,
-    hora_inicio DATETIME,
-    hora_fin DATETIME,
-    tipoEntrada VARCHAR(255), -- Modificado a VARCHAR en lugar de FK
-    FOREIGN KEY (id_semaforo) REFERENCES semaforo(id),
-    FOREIGN KEY (id_usuario) REFERENCES usuario(id_cui),
-    FOREIGN KEY (id_sesion) REFERENCES sesion(id)
+    id_persona INT NOT NULL,
+    telefono VARCHAR(20) NOT NULL,
+    correo_contacto VARCHAR(100),
+    FOREIGN KEY (id_persona) REFERENCES persona(id)
 );
 
- 
+-- Tabla ocupante
+CREATE TABLE ocupante (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_persona INT NOT NULL,
+    fecha_fallecimiento DATE NOT NULL,
+    id_causa_fallecimiento INT NOT NULL,
+    FOREIGN KEY (id_persona) REFERENCES persona(id),
+    FOREIGN KEY (id_causa_fallecimiento) REFERENCES causa_fallecimiento(id)
+);
+
+-- Tabla contrato
+CREATE TABLE contrato (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_nicho INT NOT NULL,
+    id_user INT NOT NULL,
+    id_estado_contrato INT NOT NULL,
+    fecha_incio_contrato DATE NOT NULL,
+    fecha_finalizacion DATE NOT NULL,
+    id_ocupante INT NOT NULL,
+    id_responsable INT NOT NULL,
+    FOREIGN KEY (id_nicho) REFERENCES nicho(id),
+    FOREIGN KEY (id_user) REFERENCES user(id),
+    FOREIGN KEY (id_estado_contrato) REFERENCES estado_contrato(id),
+    FOREIGN KEY (id_ocupante) REFERENCES ocupante(id),
+    FOREIGN KEY (id_responsable) REFERENCES responsable_nicho(id)
+);
+
+-- Tabla boleta_pago
+CREATE TABLE boleta_pago (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    no_correlativo VARCHAR(50) UNIQUE NOT NULL,
+    id_estado_boleta INT NOT NULL,
+    id_contrato INT NOT NULL,
+    imagen_comprobante TEXT,
+    FOREIGN KEY (id_estado_boleta) REFERENCES estado_boleta(id),
+    FOREIGN KEY (id_contrato) REFERENCES contrato(id)
+);
+
+-- Tabla solicitud_nicho
+CREATE TABLE solicitud_nicho (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_user INT NOT NULL,
+    id_ocupante INT NOT NULL,
+    id_responsable INT NOT NULL,
+    fecha DATE NOT NULL,
+    id_estado_solicitud INT NOT NULL,
+    FOREIGN KEY (id_user) REFERENCES user(id),
+    FOREIGN KEY (id_ocupante) REFERENCES ocupante(id),
+    FOREIGN KEY (id_responsable) REFERENCES responsable_nicho(id),
+    FOREIGN KEY (id_estado_solicitud) REFERENCES estado_solicitud(id)
+);
+
+-- Tabla acuerdo_exhumacion
+CREATE TABLE acuerdo_exhumacion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_nicho INT NOT NULL,
+    id_ente_autorizador INT NOT NULL,
+    fecha DATE NOT NULL,
+    id_motivoExhumacion INT NOT NULL,
+    FOREIGN KEY (id_nicho) REFERENCES nicho(id),
+    FOREIGN KEY (id_ente_autorizador) REFERENCES ente_autorizador(id),
+    FOREIGN KEY (id_motivoExhumacion) REFERENCES motivoExhumacion(id)
+);
+
+-- Insertar datos de ejemplo para las tablas de estados y tipos
+INSERT INTO pais (nombre) VALUES 
+('Guatemala');
+
+INSERT INTO departamento (nombre, id_pais) VALUES 
+('Quetzaltenango', 1);
+
+INSERT INTO municipio (nombre, id_departamento) VALUES 
+('Almolonga', 1), ('Cabricán', 1);
+
+INSERT INTO estado_boleta (estado) VALUES 
+('Pendiente de pago'), ('Pendiente de verificación'), ('Verificado');
+
+INSERT INTO estado_contrato (estado) VALUES 
+('Borrador'), ('Revisión'), ('Vigente'), ('Vencido'), ('Suspendido');
+
+INSERT INTO causa_fallecimiento (causa) VALUES 
+('Cardiovasculares'), ('Respiratorias pulmón'), ('Cánceres'), 
+('Infecciosas'), ('Causas externas'), ('Otras enfermedades');
+
+INSERT INTO rol_user (rol) VALUES 
+('admin'), ('assistant'), ('auditor'), ('user');
+
+INSERT INTO tipo_nicho (tipo) VALUES 
+('adulto'), ('ninio'), ('historico');
+
+INSERT INTO estado_nicho (estado) VALUES 
+('ocupado'), ('disponible'), ('proceso_exumacion');
+
+INSERT INTO ente_autorizador (nombre) VALUES 
+('ministerio_salud'), ('orden_judicial');
+
+INSERT INTO estado_solicitud (estado) VALUES 
+('sin revision'), ('aceptada'), ('rechazada');
+
+INSERT INTO motivoExhumacion (motivo) VALUES 
+('Judiciales'), ('Científicos'), ('Familiares'), ('Administrativos');
 
 
 
--- * | Hora de inicio y fin de la sesion
-
-
--- ciclos largos / ciclos cortos
-
--- accion_conjunto:
--- id
--- id_emulacion
--- cantidad_tiempo
--- es_aumento 
--- color
--- hora_accion
-
-
--- accion_unitaria:
--- id
--- id_emulacion
--- id_semaforo
--- cantidad_tiempo
--- es_aumento 
--- color
--- hora_accion
-
-
-
--- consultassss
--- el tiempo minimo de espera
--- el tiempo maximo de espera
--- cuantos autos pasan pueden pasar 
-        -- con esa configuracion (marcarlo en cada modificacion) 
-
-
-
-
-
-
-
-
-
-
-
--- Inserciones en estado
-INSERT INTO estado (nombre) VALUES ('Fuera de servicio'), ('Training'), ('Activo');
-
--- Inserciones en departamento
-INSERT INTO departamento (nombre) VALUES ('Guatemala'), ('Quetzaltenango'), ('Sacatepéquez'), ('Escuintla');
-
--- Inserciones en municipio
-INSERT INTO municipio (nombre, id_departamento) VALUES
-('Guatemala', 1), ('Mixco', 1), ('Villa Nueva', 1),
-('Quetzaltenango', 2), ('Coatepeque', 2), ('La Esperanza', 2),
-('Antigua Guatemala', 3), ('Ciudad Vieja', 3), ('San Lucas Sacatepéquez', 3),
-('Escuintla', 4), ('Santa Lucía Cotzumalguapa', 4), ('Tiquisate', 4);
-
-
--- Inserciones en zona (aleatorio)
-INSERT INTO zona (id_municipio) VALUES (1), (2), (3), (4), (5), (6), (7), (8), (9), (10), (11), (12);
-
--- Inserciones en rol
-INSERT INTO rol (nombre) VALUES ('admin'), ('monitor'), ('supervisor');
-
-
-
-
--- -- Inserción de usuarios
--- INSERT INTO usuario (id_cui, username, password, nombres, apellidos, calle_avenida_asignada, id_rol, id_estado) 
--- VALUES
--- ('123456', 'wilson', 'uno', 'Wilson', 'Perez', NULL, 1, 3),
--- ('234567', 'jon', 'dos', 'Jon', 'Lopez', NULL, 2, 3),
--- ('345678', 'chayan', 'tres', 'Chayan', 'Mendez', NULL, 3, 3);
 
 
 -- echo password_hash('admin123', PASSWORD_DEFAULT);
 
-INSERT INTO usuario (id_cui, username, password, nombres, apellidos, calle_avenida_asignada, id_rol, id_estado) 
+INSERT INTO user (mail, password, id_rol) 
 VALUES
-('123456', 'wilson', '$2y$10$J8fGDFkvClj31KULjo34p.fKhS0rQs9p0.QsfsJoVWiDrV.rYgIay', 'Wilson', 'Perez', NULL, 1, 3);
+('wilson', '$2y$10$J8fGDFkvClj31KULjo34p.fKhS0rQs9p0.QsfsJoVWiDrV.rYgIay', 1);
+
 -- ('234567', 'jon', SHA2('dos', 256), 'Jon', 'Lopez', NULL, 2, 3),
 -- ('345678', 'chayan', SHA2('tres', 256), 'Chayan', 'Mendez', NULL, 3, 3);

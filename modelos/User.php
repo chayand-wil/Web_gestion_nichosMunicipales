@@ -88,18 +88,7 @@ class User{
         return $this->estado;
     }
         
-
-
-    
-
-
-
-
-
-
-
-
-
+ 
 
 
     public function setJur_correo(string $nombre){
@@ -109,6 +98,51 @@ class User{
         return $this->jur_correo;
     }
     
+
+
+
+
+
+
+
+
+    public function darCalles() {
+        // retornar las calles
+        $numero = array(1,2,3,6,7,8,9 );
+
+        return $numero;
+    }
+    
+    // public function darAvenidas($calle) {
+    //     // retornar las avenidas
+    //     $numero = array(4,5,6);
+        
+    //         //retornar las avenidas
+    //     return $numero;
+    // }
+
+    public function darIntersecciones() {
+        // retornar las avenidas
+        // consulta o vista que retorne  numero de calle, y  numero de avenida 
+
+        $sql = "";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->bindParam(':id_user', $idUser, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+ 
+    public function verNichos() {
+        //retornar todos los nichos
+        
+
+    }
+
+
+
 
 
     public function insertUsuario($user) {
@@ -272,28 +306,7 @@ public function viewUsers(){
  
 
 
-//  public function viewPublications($id_user){        //Listar publicaciones aceptadas
-//                                                 //muestra las publicaciones visibles 
-//                                                 //No muestra las publicaciones que este usuario ha reportado 
-//     try{
-
-//         $stmt = $this->pdo->prepare("SELECT * FROM vista_publicacion_completa v
-//         WHERE NOT EXISTS (
-//             SELECT 1
-//             FROM reporte r
-//             WHERE r.id_publicacion = v.id_publicacion
-//             AND r.id_reportador = :id_user
-//         )");
-
-//         $stmt->bindParam(':id_user', $id_user, PDO::PARAM_INT);
-//         $stmt->execute();
-
-//         return $stmt->fetchAll(PDO::FETCH_OBJ);
-
-//     }catch(Exception $e){
-//         die($e->getMessage());
-//     }
-//  }  
+ 
 
 
 public function delete_user($id_user){
@@ -330,29 +343,7 @@ public function delete_user($id_user){
 
 
 
-
-
-
- public function viewUnaPublicacion($id){        //Listar publicaciones aceptadas
-    // WHERE estado.nombre_estado = 'Aceptada';
-    // $id = "Aceptada";
-    try{
-        
-        $consulta = $this->pdo->prepare("
-        CALL vista_una_publicacion(:fil);
-         ");
-        $consulta->bindParam(':fil', $id);
-        
-        $consulta->execute(); 
-        return $consulta->fetch(PDO::FETCH_OBJ);
-
-
-    }catch(PDOException $e){
-        die($e->getMessage());
-    }
- }
-
-
+ 
 
  
  public function insertarReporte($publicacionId, $idMotivo, $idReportador){

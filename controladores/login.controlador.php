@@ -37,7 +37,7 @@ class loginControlador{
             if ($user){
                 $_SESSION['username'] = $username;
                 $_SESSION['role'] = $user['id_rol'];
-                $_SESSION['id'] = $user['id_cui'];
+                $_SESSION['id'] = $user['mail'];    
 
 
 

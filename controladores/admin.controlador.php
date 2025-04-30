@@ -7,23 +7,45 @@ require_once "modelos/Publicacion.php";
 require_once "modelos/User.php";
 
 class adminControlador{
-    private $titulo = "Aceptadas";
+
+     
     private $modelo;
     private $modelo2;
+    
     private $currentId;
-    private $filtroReporte = "Sin revision";
+    private $titulo = "Aceptadas";
     private $filtro = 2;
     private $reportes;
     private $condicionRep = 1 ;
-   
+
+    private $verNichosPor =  'filtrar';
+  
+
     private $menu = "usuarios" ;
     private $submenu = "listar" ;
-    private $reportesUsers;
-    
-    
+     
     private $userss;
     
- 
+    private $tituloEstado = "Todos los Nichos";
+    private $filtroEstado = "todos";
+
+
+
+
+    private $losNichos;
+    private $losNichosFiltrados;
+
+    private $calles;
+    private $avenidas;
+    private $intersecciones;
+    private $calleSelected;
+    private $avenidaSelected;
+    // array("d", "d");
+    
+
+
+
+
     public function __CONSTRUCT(){
         $this->modelo2 = new User;
 
@@ -32,9 +54,7 @@ class adminControlador{
  
 
  
-
-
-
+ 
 
     public function Inicio(){
         // $this->filtrarPublications($this->filtro);
@@ -55,9 +75,15 @@ class adminControlador{
                 }
                 
 
+
+                $this->cargarCallesAv();
+                // calles por default en  
+
+
                 
                 require_once "vista/users/admin/index.php";
                 // $this->userss = $this->modelo2->viewUsers();
+             
 
             }else{
                 // require_once "vista/users/admin/index.php"; 
@@ -69,17 +95,114 @@ class adminControlador{
             header("location:?c=inicio");
             exit;
         }
-
-        // require_once "vista/users/admin/index.php"; 
-        // require_once "vista/users/admin/revision.php"; 
-        // exit(); 
-        // require_once "vista/encabezado.php";
-        // require_once "vista/topsJugadores/index.php";
-        // require_once "vista/pie.php";
+ 
     }
  
  
  
+
+
+
+    public function cargarCallesAv(){
+        // cargar las calles
+        // $this->calles = $this->modelo2->darCalles();
+        // // calle por default
+        // $this->calleSelected = $this->calles[0];
+        // //cargar las intersecciones
+        // $this->intersecciones = $this->modelo2->darIntersecciones();
+        
+        // //llenando las avenidas
+        // foreach($this->intersecciones as $intersec):
+        //     if($intersec->calle == $this->calleSelected){
+        //         $this->avenidas[] = $intersec->avenida;
+        //     }
+            
+        // endforeach;
+        // // avenida por default
+        // $this->avenidaSelected = $this->avenidas[0];
+ 
+
+    }
+
+
+    public function filtrarArrNichos(){
+        if($this->filtroEstado == "todos"){
+            //ver todos los nichos
+            $this->losNichosFiltrados = $this->losNichos;
+        }else{
+            foreach ($this->losNichos as $nicho):
+                // filtrar por estado
+                if($nicho->estado == $this->filtroEstado){
+                    
+                    // filtrar por calle
+                    if($nicho->no_calle == $this->calleSelected){
+                        // filtrar por avenida
+                        if($nicho->no_ave == $this->avenidaSelected){
+                            $this->losNichosFiltrados[] = $nicho;
+    
+                        }
+                    }
+                } 
+    
+            endforeach;
+        }
+
+    }
+
+
+    public function filtrarNicho(){
+        $tipoFiltro = $_GET['filtro'];
+        
+
+
+         switch($tipoFiltro){
+            case 'disponible':
+                $this->tituloEstado = "Nichos Disponibles";
+                $this->filtroEstado = "disponible";
+            break;
+            case 'ocupado':
+                $this->tituloEstado = "Nichos ocupados";
+                $this->filtroEstado = "ocupado";
+                break;
+            case 'historico':
+                $this->tituloEstado = "Nichos historicos";
+                $this->filtroEstado = "historico";
+                break;
+
+            case 'todos':
+                $this->tituloEstado = "Todos los Nichos";
+                $this->filtroEstado = "todos";
+                    
+                break;
+            default:
+                $this->verNichosPor = $tipoFiltro;
+   
+                if(!($this->verNichosPor == 'filtrar')){
+                    $this->tituloEstado = "Resultados de la busqueda";
+                }
+
+                break;
+
+        }
+ 
+        // traer los nichos
+        // $this->losNichos = $this->modelo2->verNichos();
+        $this->identificarMenu();
+ 
+
+        // recorrer los nichos para llenar losNichosFiltrados
+        $this->filtrarArrNichos();         
+
+
+        require_once "vista/users/admin/index.php";
+ 
+    
+    }
+
+
+
+
+
 
     public function filtrar(){
         $this->identificarFiltros();
@@ -92,9 +215,7 @@ class adminControlador{
     
 
     public function eliminarUserC(){ 
-        // var_dump('');
-        // exit;
-
+ 
         $this->identificarFiltros();
         $id_user = $_GET['id_user'];
         
@@ -106,7 +227,7 @@ class adminControlador{
 
 
 
-    
+
     public function identificarFiltros() {
         $this->filtro = $_GET['filtro'];
 
@@ -125,8 +246,13 @@ class adminControlador{
         }
 
     }
-
+                    //todo sobre los nihcos en el admin
     public function identificarMenu() {
+        $this->cargarCallesAv();
+        // calles por default en  
+        $this->calleSelected = $this->calles[0];
+        $this->avenidaSelected = $this->avenidas[0];
+
         $this->menu = $_SESSION['menu'];
         $this->filtro = $_GET['filtro'];
 
@@ -192,127 +318,8 @@ class adminControlador{
     }
 
 
-
-    // public function mostrarReportes() {
-
-        
-    // if (isset($_GET['id'])) {
-    //     $this->currentId = $_GET['id'];
-
-    // } else {
-    //     var_dump("No se recibio el id");
-    //     exit;
-    // }
-
-    // $this->reportes = $this->modelo->getReportesByid($this->currentId);
-    // require_once "vista/users/admin/reportadas_reportes.php";
-
-        
-    // }
-
-    
-    
-
-    // public function mostrarFiltrarReportes() {
-    //     $this->menu = $_SESSION['menu'];
-         
-    //     if($this->menu == "usuarios"){
-    //         $this->condicionRep = $_GET['tipor'];
-    //         $this->reportesUsers = $this->modelo->getAllsReportes();
-    //         require_once "vista/users/admin/index.php";
-            
-    //     }else if($this->menu=="publicaciones"){
-    //       $this->currentId = $_GET['id'];
-    //         $filtro = $_GET['tipor'];
-    //         $this->condicionRep = $_GET['tipor'];
-    //         switch($filtro){
-    //             case 1:
-    //                 $this->filtroReporte = "Sin Revision";
-    //                 break;
-    //                 case 2:
-    //                     $this->filtroReporte = "Ignorado";
-    //                     break;
-    //                     case 3:
-    //                         $this->filtroReporte = "Aceptado";
-    //                         break;
-    //                     }
-                        
-    //         // var_dump("aquiii>>: " . $this->filtroReporte);
-    //         //         exit;
-    //         $this->reportes = $this->modelo->getReportesByid($this->currentId);
-                        
-    //         require_once "vista/users/admin/reportadas_reportes.php";
-    //     }else{  //reportes
-
-
-
-    //     }
-
-
-
-       
-    // }
-
-    // public function updateReporte() {
-    //     $this->menu = $_SESSION['menu'];
-
-        
-    //     if($this->menu =="usuarios"){
-    //         $id_e = $_GET['id_e'];
-    //         $id_r =  $_GET['id_r'];
-            
-    //         $this->modelo->updateReporteUser($id_e, $id_r);
-
-    //         $this->mostrarFiltrarReportes();
-
-    //     }else{
-    //         $this->currentId =  $_GET['id'];
-    //         $id_r =  $_GET['id_r'];
-    //         $id_e = $_GET['id_e'];
-            
-    //         $this->modelo->updateReporte($id_e, $id_r);
-    //         $this->mostrarFiltrarReportes();
-    //         // mensaje exitooo
-    //     }
-         
-        
-    // }
-    
-    // public function updatePub() {
-    //     $this->currentId = $_GET['id'];
-    //     $idUpdate = $_GET['idU'];
-    //     // var_dump("idP: " . $this->currentId);    
-    //     // var_dump("idUP: " . $idUpdate);
-    //     // exit;
-    //     $this->modelo->updatePublicacion($this->currentId, $idUpdate);
-
-    //     //update estado  publicacion (2 , 4) aceptada y rechazada
-
-
-    //     $this->Inicio();
-    // }
-    
-
-
-
-
-
-    
-     
- 
  
 
-
-
-
-
-
-
-    
-        
-    
-
-
-
+ 
 
 }

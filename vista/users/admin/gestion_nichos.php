@@ -31,7 +31,7 @@
 
 <br><br> 
 <br><br><br>
-<br><br> 
+<br><br> <br>
 
 <?php if($this->titulo == 'Aceptadas'):?>
     <h2 style="color: blanchedalmond;">Ver Nichos</h2>
