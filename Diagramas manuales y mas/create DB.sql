@@ -20,6 +20,7 @@ CREATE TABLE departamento (
     FOREIGN KEY (id_pais) REFERENCES pais(id)
 );
 
+
 -- Tabla municipio (Almolonga, Cabrican)
 CREATE TABLE municipio (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -82,7 +83,7 @@ CREATE TABLE motivoExhumacion (
     motivo VARCHAR(100) NOT NULL
 );
 
--- Tabla calle
+-- Tabla calle  
 CREATE TABLE calle (
     id INT AUTO_INCREMENT PRIMARY KEY,
     numero INT NOT NULL,
@@ -131,7 +132,6 @@ CREATE TABLE ubicacion_nicho (
 -- Tabla nicho
 CREATE TABLE nicho (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    codigo VARCHAR(50) UNIQUE NOT NULL,
     id_estado_nicho INT NOT NULL,
     id_tipo_nicho INT NOT NULL,
     id_ubicacion INT NOT NULL,
@@ -264,3 +264,4 @@ VALUES
 
 -- ('234567', 'jon', SHA2('dos', 256), 'Jon', 'Lopez', NULL, 2, 3),
 -- ('345678', 'chayan', SHA2('tres', 256), 'Chayan', 'Mendez', NULL, 3, 3);
+

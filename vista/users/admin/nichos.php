@@ -10,7 +10,7 @@
         
 .contenedor-filtros {
     width: 100%;
-    max-width: 1200px; /* Limita el ancho máximo */
+    max-width: 1400px; /* Limita el ancho máximo */
     margin: 20px auto; /* Centra el contenedor con margen superior e inferior */
     padding: 0 20px; /* Añade espacio lateral */
 }
@@ -132,6 +132,11 @@ input[type="radio"]:checked::before {
     border-radius: 5px;
     border: none;
 }
+#tipoNichoSelect {
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+}
 
     </style>
 
@@ -158,20 +163,25 @@ input[type="radio"]:checked::before {
                 <select id="estadoNichosSelect"> 
                     <option value="disponible" <?php  echo ($this->filtroEstado === 'disponible') ? 'selected' : ''; ?>>Nichos disponibles</option>
                     <option value="ocupado" <?php  echo ($this->filtroEstado === 'ocupado') ? 'selected' : ''; ?> >Nichos ocupados</option>
-                    <option value="historico"  <?php  echo ($this->filtroEstado === 'historico') ? 'selected' : ''; ?> >Nichos historicos</option>
                     <option value="todos"  <?php  echo ($this->filtroEstado === 'todos') ? 'selected' : ''; ?> >Todos los nichos</option>
-
- 
-
                 </select>
-            </div>                        
+            </div>
+            <div class="tipo-publico">
+                <label for="tipoNichoSelect"><h3>Tipo de nicho</h3></label>
+                <select id="tipoNichoSelect"> 
+                    <option value="Adulto" <?php  echo ($this->filtroTipo === 'Adulto') ? 'selected' : ''; ?>>Adulto</option>
+                    <option value="Ninio" <?php  echo ($this->filtroTipo === 'Ninio') ? 'selected' : ''; ?> >Ninio</option>
+                    <option value="Historico"  <?php  echo ($this->filtroTipo === 'Historico') ? 'selected' : ''; ?> >Historicooo</option>
+                </select>
+            </div>    
+                                
             <div class="tipo-publico">
                 <label for="calleNichosSelect"><h3>Calle</h3></label>
                 <select id="calleNichosSelect"> 
                     <?php foreach ($this->calles as $calle): ?>
-                        <option value="<?php echo htmlspecialchars($calle); ?>"
-                            <?php echo ($this->calleSelected ===   $calle) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($calle); ?>
+                        <option value="<?php echo htmlspecialchars($calle->numero); ?>"
+                            <?php echo ($this->filtroCalle ==   $calle->numero) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($calle->nombre . " " . $calle->numero ); ?>
                         </option>
                     <?php endforeach; ?>
                     
@@ -182,14 +192,15 @@ input[type="radio"]:checked::before {
                 <label for="avenidaNichosSelect"><h3>Avenida</h3></label>
                 <select id="avenidaNichosSelect"> 
                     <?php foreach ($this->avenidas as $avenida): ?>
-                        <option value="<?php echo htmlspecialchars($avenida); ?>"
-                            <?php echo ($this->calleSelected ===   $avenida) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($avenida); ?>
+                        <option value="<?php echo htmlspecialchars($avenida->numero_avenida); ?>"
+                            <?php echo ($this->filtroAvenida ==   $avenida->numero_avenida) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($avenida->nombre_avenida . " " . $avenida->numero_avenida); ?>
                         </option>
                     <?php endforeach; ?>
 
                 </select>
             </div>            
+
   
             <label>
                 <input type="radio" name="categoria" value="buscar"  
@@ -201,18 +212,12 @@ input[type="radio"]:checked::before {
                 <button onclick="buscar()">Buscar</button>
             </div>
 
-
-
-
-                    
+  
 
                     
                     
                 </div>
-         
-
-
-
+          
     </div>
 
 
@@ -228,25 +233,26 @@ input[type="radio"]:checked::before {
 <div class="grid-container">  
  
 
-<!-- tituloooo del estado del nicho -->
- 
-        <br>
-       
-            <h2> <?= $this->tituloEstado; ?></h2>
+    
+    <!-- tituloooo del estado del nicho -->
             <br>
+        <?php if($this->verNichosPor == 'buscar'):?>
+            <h2> <?= $this->tituloEstado   ?></h2>
+            <br>
+        <?php else: ?>
+            <h4 style="text-align: right;"> <?= $this->tituloEstado . " - " . $this->filtroTipo ." - ". $this->calleSelected->nombre . " - ". $this->avenidaSelected->nombre_avenida;   ?></h4>
+                <br>
+        <?php endif; ?>
 
 
 
+<!-- tarjetasss -->
+        <?php foreach($this->losNichosFiltrados as $ni): ?>
  
-
-
-
-
-
             <div class="card">
                 <div class="container">
                     <div class="header">
-                        <div class="date"><?=$eq->fecha_hora?></div>
+                        <div class="date"><?=$ni->id?></div>
                         <button class="report-button" data-id="<?=$eq->id_publicacion?>" data-tittle="<?=$eq->titulo?>"  title="Reportar">
                             &#9888;
                         </button>
@@ -270,35 +276,10 @@ input[type="radio"]:checked::before {
                     </div>
                 </div>
                                 
-            </div>            
-            <div class="card">
-                <div class="container">
-                    <div class="header">
-                        <div class="date"><?=$eq->fecha_hora?></div>
-                        <button class="report-button" data-id="<?=$eq->id_publicacion?>" data-tittle="<?=$eq->titulo?>"  title="Reportar">
-                            &#9888;
-                        </button>
-                    </div>
-                    <div class="image">
-                        <!-- <img src="<?= $eq->imgdir?>" alt="Imagen del evento"> -->
-                        <img src="assets/img/nicho3.png" alt="Imagen del evento">
-                    </div>
-                    <div class="content">
-                        <h2><?=$eq->titulo?></h3>
-                        <p>Lugar: <?=$eq->lugar?></p>
-                        <p> <?=$eq->descripcion?></p>
-                        <h3>invita: <?=$eq->username?></h3>
-                    </div>
-                    <div class="footerTarjeta">
-                        
-                        <div class="attendance"> Asistirán: <?= $eq->currentAsistentes?> </div> 
- 
-                         <button class="details-button" onclick="cargarVista('?c=user_reg&a=mostrarPub&id=<?= $eq->id_publicacion?>')" >Más detalles</button>
+            </div>   
+        <?php endforeach; ?>
 
-                    </div>
-                </div>
-                                
-            </div>             
+            
         
          
  <!-- Puedes agregar más tarjetas aquí siguiendo el mismo formato -->
@@ -314,31 +295,52 @@ input[type="radio"]:checked::before {
 <script>
 
     document.addEventListener('DOMContentLoaded', () => {
-            const tipoPublicoSelect = document.getElementById('estadoNichosSelect');
+            const estado = document.getElementById('estadoNichosSelect');
+            const tipo = document.getElementById('tipoNichoSelect');
             const calles = document.getElementById('calleNichosSelect');
             const avenidas = document.getElementById('avenidaNichosSelect');
             const categoriaInputs = document.querySelectorAll('input[name="categoria"]');
 
-            tipoPublicoSelect.addEventListener('change', () => {
-                // alert('Tipo público seleccionado:' + tipoPublicoSelect.value);
-                const controlador = "?c=admin&a=filtrarNicho&filtro=";
-                const url = controlador + tipoPublicoSelect.value;
-                cargarFiltro(url);
+            estado.addEventListener('change', () => {
+                // alert('Tipo público seleccionado:' + estado.value);
+                const controlador = "?c=admin&a=filtrarNicho&estado=";
+                const url = controlador + estado.value + "&tipo=" + tipo.value
+                + "&calle=" + calles.value
+                + "&avenida=" + avenidas.value;
+
+                cargarFiltro(url );
+
+            });
+
+            tipo.addEventListener('change', () => {
+                // alert('Tipo público seleccionado:' + estado.value);
+                const controlador = "?c=admin&a=filtrarNicho&estado=";
+                const url = controlador + estado.value + "&tipo=" + tipo.value
+                + "&calle=" + calles.value
+                + "&avenida=" + avenidas.value;
+
+                cargarFiltro(url );
                 
             });
 
             calles.addEventListener('change', () => {
-                // alert('Tipo público seleccionado:' + tipoPublicoSelect.value);
-                const controlador = "?c=admin&a=filtrarNicho_calle&filtro=";
-                const url = controlador + calles.value;
-                cargarFiltro(url);
+                // alert('Tipo público seleccionado:' + estadoNichoSelect.value);
+                const controlador = "?c=admin&a=filtrarNicho&estado=";
+                const url = controlador + estado.value + "&tipo=" + tipo.value
+                + "&calle=" + calles.value
+                + "&avenida=" + avenidas.value;
+
+                cargarFiltro(url );
             });
 
             avenidas.addEventListener('change', () => {
-                // alert('Tipo público seleccionado:' + tipoPublicoSelect.value);
-                const controlador = "?c=admin&a=filtrarNicho_avenida&filtro=";
-                const url = controlador + avenidas.value;
-                cargarFiltro(url);
+                // alert('Tipo público seleccionado:' + estadoNichoSelect.value);
+                const controlador = "?c=admin&a=filtrarNicho&estado=";
+                const url = controlador + estado.value + "&tipo=" + tipo.value
+                + "&calle=" + calles.value
+                + "&avenida=" + avenidas.value;
+
+                cargarFiltro(url );
                 
             });
 
@@ -346,9 +348,12 @@ input[type="radio"]:checked::before {
             categoriaInputs.forEach(input => {
                 input.addEventListener('change', () => {
                     // alert('Categoría seleccionada:'+  input.value);
-                    const controlador = "?c=admin&a=filtrarNicho&filtro=";
-                    const url = controlador + input.value;
-                    cargarFiltro(url);
+                    const controlador = "?c=admin&a=filtrarNicho&estado=";
+                    const url = controlador + input.value + "&tipo=" + tipo.value
+                    + "&calle=" + calles.value
+                    + "&avenida=" + avenidas.value;
+
+                cargarFiltro(url );
 
                 });
             });
@@ -357,6 +362,7 @@ input[type="radio"]:checked::before {
 
 
     function cargarFiltro(url) {
+
         window.location.href = url;  // Redirige a la nueva URL
     }
     function buscar() {

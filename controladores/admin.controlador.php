@@ -28,24 +28,26 @@ class adminControlador{
     
     private $tituloEstado = "Todos los Nichos";
     private $filtroEstado = "todos";
+    private $filtroTipo = "adulto";
 
+    private $filtroCalle = 1;
+    private $filtroAvenida = 1;
 
-
-
+ 
     private $losNichos;
     private $losNichosFiltrados;
 
+ 
     private $calles;
     private $avenidas;
     private $intersecciones;
+
     private $calleSelected;
     private $avenidaSelected;
+
     // array("d", "d");
     
-
-
-
-
+ 
     public function __CONSTRUCT(){
         $this->modelo2 = new User;
 
@@ -76,7 +78,7 @@ class adminControlador{
                 
 
 
-                $this->cargarCallesAv();
+                $this->cargarCallesAv_nichos();
                 // calles por default en  
 
 
@@ -103,24 +105,31 @@ class adminControlador{
 
 
 
-    public function cargarCallesAv(){
+    public function cargarCallesAv_nichos(){
+        $this->losNichos = $this->modelo2->darNichos();
+
         // cargar las calles
-        // $this->calles = $this->modelo2->darCalles();
-        // // calle por default
-        // $this->calleSelected = $this->calles[0];
-        // //cargar las intersecciones
-        // $this->intersecciones = $this->modelo2->darIntersecciones();
-        
-        // //llenando las avenidas
-        // foreach($this->intersecciones as $intersec):
-        //     if($intersec->calle == $this->calleSelected){
-        //         $this->avenidas[] = $intersec->avenida;
-        //     }
-            
-        // endforeach;
-        // // avenida por default
-        // $this->avenidaSelected = $this->avenidas[0];
+        $this->calles = $this->modelo2->darCalles();
+        // calle por default
+        $this->calleSelected = $this->calles[$this->filtroCalle - 1];
  
+        //cargar las intersecciones
+        $this->intersecciones = $this->modelo2->darIntersecciones();
+        
+        // llenando las avenidas
+        foreach($this->intersecciones as $intersec):
+            if($intersec->numero_calle == $this->filtroCalle){
+                $this->avenidas[] = $intersec;
+            }
+            
+        endforeach;
+        // avenida por default
+        $this->avenidaSelected = $this->avenidas[$this->filtroAvenida-1];
+ 
+
+        $this->filtrarArrNichos();
+
+
 
     }
 
@@ -128,21 +137,37 @@ class adminControlador{
     public function filtrarArrNichos(){
         if($this->filtroEstado == "todos"){
             //ver todos los nichos
-            $this->losNichosFiltrados = $this->losNichos;
+            // $this->losNichosFiltrados = $this->losNichos;
+            
+            foreach($this->losNichos as $nicho):
+                // if($nicho->tipo == $this->filtroTipo){
+                if($nicho->tipo_nicho == $this->filtroTipo){
+                    $this->losNichosFiltrados[] = $nicho;
+                }
+            endforeach;
+ 
+            
         }else{
             foreach ($this->losNichos as $nicho):
-                // filtrar por estado
-                if($nicho->estado == $this->filtroEstado){
+                
+                // filtrar por tipo
+                if($nicho->tipo == $this->filtroTipo){
                     
-                    // filtrar por calle
-                    if($nicho->no_calle == $this->calleSelected){
-                        // filtrar por avenida
-                        if($nicho->no_ave == $this->avenidaSelected){
-                            $this->losNichosFiltrados[] = $nicho;
-    
+                    // filtrar por estado
+                    if($nicho->estado == $this->filtroEstado){
+                        
+                        // filtrar por calle
+                        if($nicho->no_calle == $this->filtroCalle){
+                            // filtrar por avenida
+                            if($nicho->no_ave == $this->filtroAvenida){
+                                $this->losNichosFiltrados[] = $nicho;
+        
+                            }
                         }
-                    }
-                } 
+                    } 
+
+                }
+                // filtrar por estado
     
             endforeach;
         }
@@ -151,11 +176,24 @@ class adminControlador{
 
 
     public function filtrarNicho(){
-        $tipoFiltro = $_GET['filtro'];
+        // $this->cargarCallesAv();
+
+        $filtroEstado = $_GET['estado'];
+
+
+        if(isset($_GET['tipo'])){
+            $this->filtroTipo = $_GET['tipo'] ;
+        }
+        if(isset($_GET['calle'])){
+            $this->filtroCalle = $_GET['calle'];
+        }
         
+        if(isset($_GET['avenida'])){
+            $this->filtroAvenida = $_GET['avenida'];
+        }  
+            
 
-
-         switch($tipoFiltro){
+        switch($filtroEstado){
             case 'disponible':
                 $this->tituloEstado = "Nichos Disponibles";
                 $this->filtroEstado = "disponible";
@@ -164,31 +202,29 @@ class adminControlador{
                 $this->tituloEstado = "Nichos ocupados";
                 $this->filtroEstado = "ocupado";
                 break;
-            case 'historico':
-                $this->tituloEstado = "Nichos historicos";
-                $this->filtroEstado = "historico";
-                break;
 
             case 'todos':
                 $this->tituloEstado = "Todos los Nichos";
                 $this->filtroEstado = "todos";
                     
                 break;
-            default:
-                $this->verNichosPor = $tipoFiltro;
-   
+            case 'buscar':
+                $this->verNichosPor = $filtroEstado;
                 if(!($this->verNichosPor == 'filtrar')){
                     $this->tituloEstado = "Resultados de la busqueda";
                 }
 
                 break;
 
-        }
- 
+            default:
+
+                break;
+                
+        } 
+         
         // traer los nichos
         // $this->losNichos = $this->modelo2->verNichos();
         $this->identificarMenu();
- 
 
         // recorrer los nichos para llenar losNichosFiltrados
         $this->filtrarArrNichos();         
@@ -248,10 +284,8 @@ class adminControlador{
     }
                     //todo sobre los nihcos en el admin
     public function identificarMenu() {
-        $this->cargarCallesAv();
-        // calles por default en  
-        $this->calleSelected = $this->calles[0];
-        $this->avenidaSelected = $this->avenidas[0];
+        $this->cargarCallesAv_nichos();
+ 
 
         $this->menu = $_SESSION['menu'];
         $this->filtro = $_GET['filtro'];

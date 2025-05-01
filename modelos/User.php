@@ -107,12 +107,71 @@ class User{
 
 
     public function darCalles() {
-        // retornar las calles
-        $numero = array(1,2,3,6,7,8,9 );
 
-        return $numero;
+        try{
+            // retornar las calles
+            $sql = "SELECT * FROM calle;";
+            
+            $stmt = $this->pdo->prepare($sql);
+            // $stmt->bindParam(':id_user', $idUser, PDO::PARAM_INT);
+            $stmt->execute();
+            // var_dump(">>>"); exit;
+            
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+            
+
+        }catch(PDOException $e){
+            echo "Error al insertar publicacion: " . $e->getMessage();
+            exit;
+            // header("location:?c=user");
+        }
+ 
+    }
+
+    public function darNichos() {
+        //consulta que devuelva 
+ 
+        try{
+            // retornar las calles
+            $sql = "
+            SELECT 
+                n.*, 
+                tn.tipo AS tipo_nicho,
+                c.numero AS numero_calle,
+                a.numero AS numero_avenida
+            FROM 
+                nicho n
+            LEFT JOIN 
+                tipo_nicho tn ON n.id_tipo_nicho = tn.id
+            LEFT JOIN 
+                ubicacion_nicho u ON n.id_ubicacion = u.id
+            LEFT JOIN 
+                calle c ON u.id_calle = c.id
+            LEFT JOIN 
+                avenida a ON u.id_avenida = a.id;
+
+            
+            ";
+            
+            $stmt = $this->pdo->prepare($sql);
+            // $stmt->bindParam(':id_user', $idUser, PDO::PARAM_INT);
+            $stmt->execute();
+            // var_dump(">>>"); exit;
+            
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+            
+
+        }catch(PDOException $e){
+            echo "Error al insertar publicacion: " . $e->getMessage();
+            exit;
+            // header("location:?c=user");
+        }
+ 
     }
     
+
+
+
     // public function darAvenidas($calle) {
     //     // retornar las avenidas
     //     $numero = array(4,5,6);
@@ -123,12 +182,24 @@ class User{
 
     public function darIntersecciones() {
         // retornar las avenidas
-        // consulta o vista que retorne  numero de calle, y  numero de avenida 
+        // consulta o vista que retorne el numero de calle y nombre de calle, numero de avenida y nombre avenida.
+         $sql = "SELECT 
+                i.id AS ubicacion_nicho,
+                c.numero AS numero_calle, 
+                c.nombre AS nombre_calle, 
+                a.numero AS numero_avenida, 
+                a.nombre AS nombre_avenida
+            FROM 
+                ubicacion_nicho i
+            JOIN 
+                calle c ON i.id_calle = c.id
+            JOIN 
+                avenida a ON i.id_avenida = a.id;
+            ";
 
-        $sql = "";
 
         $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':id_user', $idUser, PDO::PARAM_INT);
+        // $stmt->bindParam(':id_user', $idUser, PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_OBJ);
@@ -143,6 +214,18 @@ class User{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+    
 
 
     public function insertUsuario($user) {
@@ -276,16 +359,12 @@ public function viewUsers(){
         //     AND r.id_reportador = :id_user
         // )")
         $stmt = $this->pdo->prepare("SELECT 
-                u.id_cui, 
-                u.username, 
-                u.password, 
-                u.nombres, 
-                u.apellidos, 
-                r.nombre AS rol, 
-                e.nombre AS estado
-            FROM usuario u
-            JOIN rol r ON u.id_rol = r.id
-            JOIN estado e ON u.id_estado = e.id;
+                    u.mail, 
+                    u.id, 
+                    u.password, 
+                    r.rol AS Rol
+                FROM user u
+                JOIN rol_user r ON u.id_rol = r.id;
         ");
                              
 
