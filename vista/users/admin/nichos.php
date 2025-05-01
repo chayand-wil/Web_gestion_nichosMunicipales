@@ -163,15 +163,16 @@ input[type="radio"]:checked::before {
                 <select id="estadoNichosSelect"> 
                     <option value="disponible" <?php  echo ($this->filtroEstado === 'disponible') ? 'selected' : ''; ?>>Nichos disponibles</option>
                     <option value="ocupado" <?php  echo ($this->filtroEstado === 'ocupado') ? 'selected' : ''; ?> >Nichos ocupados</option>
+                    <option value="proceso_exumacion"  <?php  echo ($this->filtroEstado === 'proceso_exumacion') ? 'selected' : ''; ?> >En proceso de exhumacion</option>
                     <option value="todos"  <?php  echo ($this->filtroEstado === 'todos') ? 'selected' : ''; ?> >Todos los nichos</option>
                 </select>
             </div>
             <div class="tipo-publico">
                 <label for="tipoNichoSelect"><h3>Tipo de nicho</h3></label>
                 <select id="tipoNichoSelect"> 
-                    <option value="Adulto" <?php  echo ($this->filtroTipo === 'Adulto') ? 'selected' : ''; ?>>Adulto</option>
-                    <option value="Ninio" <?php  echo ($this->filtroTipo === 'Ninio') ? 'selected' : ''; ?> >Ninio</option>
-                    <option value="Historico"  <?php  echo ($this->filtroTipo === 'Historico') ? 'selected' : ''; ?> >Historicooo</option>
+                    <option value="adulto" <?php  echo ($this->filtroTipo === 'adulto') ? 'selected' : ''; ?>>Adulto</option>
+                    <option value="ninio" <?php  echo ($this->filtroTipo === 'ninio') ? 'selected' : ''; ?> >Ninio</option>
+                    <option value="historico"  <?php  echo ($this->filtroTipo === 'historico') ? 'selected' : ''; ?> >Historicooo</option>
                 </select>
             </div>    
                                 
@@ -220,10 +221,7 @@ input[type="radio"]:checked::before {
           
     </div>
 
-
-
-
-
+ 
 </div>
 
 
@@ -240,7 +238,7 @@ input[type="radio"]:checked::before {
             <h2> <?= $this->tituloEstado   ?></h2>
             <br>
         <?php else: ?>
-            <h4 style="text-align: right;"> <?= $this->tituloEstado . " - " . $this->filtroTipo ." - ". $this->calleSelected->nombre . " - ". $this->avenidaSelected->nombre_avenida;   ?></h4>
+            <h4 style="text-align: right; color: white;"> <?= $this->tituloEstado . " - " . $this->filtroTipo ." - ". $this->calleSelected->nombre . " - ". $this->avenidaSelected->nombre_avenida;   ?></h4>
                 <br>
         <?php endif; ?>
 
@@ -303,7 +301,7 @@ input[type="radio"]:checked::before {
 
             estado.addEventListener('change', () => {
                 // alert('Tipo público seleccionado:' + estado.value);
-                const controlador = "?c=admin&a=filtrarNicho&estado=";
+                const controlador = "?c=admin&a=filtrarNichos&estado=";
                 const url = controlador + estado.value + "&tipo=" + tipo.value
                 + "&calle=" + calles.value
                 + "&avenida=" + avenidas.value;
@@ -314,7 +312,7 @@ input[type="radio"]:checked::before {
 
             tipo.addEventListener('change', () => {
                 // alert('Tipo público seleccionado:' + estado.value);
-                const controlador = "?c=admin&a=filtrarNicho&estado=";
+                const controlador = "?c=admin&a=filtrarNichos&estado=";
                 const url = controlador + estado.value + "&tipo=" + tipo.value
                 + "&calle=" + calles.value
                 + "&avenida=" + avenidas.value;
@@ -325,7 +323,7 @@ input[type="radio"]:checked::before {
 
             calles.addEventListener('change', () => {
                 // alert('Tipo público seleccionado:' + estadoNichoSelect.value);
-                const controlador = "?c=admin&a=filtrarNicho&estado=";
+                const controlador = "?c=admin&a=filtrarNichos&estado=";
                 const url = controlador + estado.value + "&tipo=" + tipo.value
                 + "&calle=" + calles.value
                 + "&avenida=" + avenidas.value;
@@ -335,7 +333,7 @@ input[type="radio"]:checked::before {
 
             avenidas.addEventListener('change', () => {
                 // alert('Tipo público seleccionado:' + estadoNichoSelect.value);
-                const controlador = "?c=admin&a=filtrarNicho&estado=";
+                const controlador = "?c=admin&a=filtrarNichos&estado=";
                 const url = controlador + estado.value + "&tipo=" + tipo.value
                 + "&calle=" + calles.value
                 + "&avenida=" + avenidas.value;
@@ -348,7 +346,7 @@ input[type="radio"]:checked::before {
             categoriaInputs.forEach(input => {
                 input.addEventListener('change', () => {
                     // alert('Categoría seleccionada:'+  input.value);
-                    const controlador = "?c=admin&a=filtrarNicho&estado=";
+                    const controlador = "?c=admin&a=filtrarNichos&estado=";
                     const url = controlador + input.value + "&tipo=" + tipo.value
                     + "&calle=" + calles.value
                     + "&avenida=" + avenidas.value;
@@ -360,16 +358,20 @@ input[type="radio"]:checked::before {
         });
 
 
+    function buscar() {
+        const valor = document.getElementById('searchInput').value;
+        const url = "?c=admin&a=buscarNichos&codigo=" + valor;
+        cargarFiltro(url);
+        // alert('Buscando: ' + valor);
+
+    }
+
 
     function cargarFiltro(url) {
 
         window.location.href = url;  // Redirige a la nueva URL
     }
-    function buscar() {
-        const valor = document.getElementById('searchInput').value;
-        alert('Buscando: ' + valor);
 
-    }
 
 </script>
 

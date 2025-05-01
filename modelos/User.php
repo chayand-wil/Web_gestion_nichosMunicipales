@@ -128,6 +128,29 @@ class User{
  
     }
 
+    public function buscarNicho($id) {
+        //consulta que devuelva 
+        try{
+            // retornar las calles
+            $sql = "
+            SELECT * 
+            FROM nicho 
+            WHERE id = :idd;
+            ";
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindParam(':idd', $id, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_OBJ);
+
+        }catch(PDOException $e){
+            echo "Error al insertar publicacion: " . $e->getMessage();
+            exit;
+            // header("location:?c=user");
+        }
+ 
+    }
+
     public function darNichos() {
         //consulta que devuelva 
  
@@ -138,11 +161,14 @@ class User{
                 n.*, 
                 tn.tipo AS tipo_nicho,
                 c.numero AS numero_calle,
-                a.numero AS numero_avenida
+                a.numero AS numero_avenida,
+                j.estado AS estado_nicho
             FROM 
                 nicho n
             LEFT JOIN 
                 tipo_nicho tn ON n.id_tipo_nicho = tn.id
+            LEFT JOIN 
+                estado_nicho j ON n.id_estado_nicho = j.id
             LEFT JOIN 
                 ubicacion_nicho u ON n.id_ubicacion = u.id
             LEFT JOIN 

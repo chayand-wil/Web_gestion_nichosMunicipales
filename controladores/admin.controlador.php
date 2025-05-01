@@ -28,7 +28,7 @@ class adminControlador{
     
     private $tituloEstado = "Todos los Nichos";
     private $filtroEstado = "todos";
-    private $filtroTipo = "adulto";
+    private $filtroTipo = "ninio";
 
     private $filtroCalle = 1;
     private $filtroAvenida = 1;
@@ -36,6 +36,7 @@ class adminControlador{
  
     private $losNichos;
     private $losNichosFiltrados;
+    private $nichoEncontrado;
 
  
     private $calles;
@@ -75,20 +76,16 @@ class adminControlador{
                      $_SESSION['menu'] = $_GET['menu'];   
                      $this->menu = $_SESSION['menu'] ; 
                 }
-                
+ 
+                if($this->menu == 'nichos'){
+                    $this->filtrarNichos();
+                }
 
-
-                $this->cargarCallesAv_nichos();
-                // calles por default en  
-
-
-                
                 require_once "vista/users/admin/index.php";
-                // $this->userss = $this->modelo2->viewUsers();
-             
+                
 
             }else{
-                // require_once "vista/users/admin/index.php"; 
+                
                 header("location:?c=inicio");
                 exit;
             }
@@ -100,87 +97,115 @@ class adminControlador{
  
     }
  
- 
- 
+    public function buscarNichos(){
+        $this->menu = $_SESSION['menu'];
+        $this->titulo = "Ver nichos";
+        $this->submenu = "nichos";
+        $this->verNichosPor = "buscar";
+        $this->tituloEstado = "Resultados de la busqueda";
+        $this->cargarCallesAv_nichos();
+        $this->filtrosNichos();
+
+        
+        $codigo= $_GET['codigo'];
+        $this->losNichosFiltrados = [];
+        $this->losNichosFiltrados[] = $this->modelo2->buscarNicho($codigo);
+        
+
+        require_once "vista/users/admin/index.php";
+        
+
+    }
+
+    public function filtrarNichos(){
+        $this->menu = $_SESSION['menu'];
+        $this->titulo = "Ver nichos";
+        $this->submenu = "nichos";
+
+        $this->cargarCallesAv_nichos();
+        $this->filtrosNichos();
+        if($this->verNichosPor == 'buscar'){
+            $losNichosFiltrados = [];
+            
+        }else{
+            $this->filtrarArrNichos();
+        }
+        
+        require_once "vista/users/admin/index.php";
+
+        // problema al seleccionar de los filtros no cargan los nichosss
+
+    }
 
 
-
+  
     public function cargarCallesAv_nichos(){
         $this->losNichos = $this->modelo2->darNichos();
 
         // cargar las calles
         $this->calles = $this->modelo2->darCalles();
-        // calle por default
-        $this->calleSelected = $this->calles[$this->filtroCalle - 1];
- 
+
         //cargar las intersecciones
         $this->intersecciones = $this->modelo2->darIntersecciones();
+
         
-        // llenando las avenidas
-        foreach($this->intersecciones as $intersec):
-            if($intersec->numero_calle == $this->filtroCalle){
-                $this->avenidas[] = $intersec;
-            }
-            
-        endforeach;
-        // avenida por default
-        $this->avenidaSelected = $this->avenidas[$this->filtroAvenida-1];
- 
-
-        $this->filtrarArrNichos();
-
-
-
     }
 
 
     public function filtrarArrNichos(){
-        if($this->filtroEstado == "todos"){
-            //ver todos los nichos
-            // $this->losNichosFiltrados = $this->losNichos;
-            
+        if($this->filtroEstado == 'todos'){
+
+                                            // filtrar por tipo
             foreach($this->losNichos as $nicho):
-                // if($nicho->tipo == $this->filtroTipo){
+                // filtrar por tipo
                 if($nicho->tipo_nicho == $this->filtroTipo){
-                    $this->losNichosFiltrados[] = $nicho;
-                }
+    
+                        // filtrar por calle
+                        if($nicho->numero_calle == $this->filtroCalle){
+                            // filtrar por avenida
+                            if($nicho->numero_avenida == $this->filtroAvenida){
+                                $this->losNichosFiltrados[] = $nicho;
+        
+                            }
+                        }
+                    }
+
             endforeach;
- 
+             
             
         }else{
             foreach ($this->losNichos as $nicho):
                 
-                // filtrar por tipo
-                if($nicho->tipo == $this->filtroTipo){
-                    
-                    // filtrar por estado
-                    if($nicho->estado == $this->filtroEstado){
+                // filtrar por estado
+                if($nicho->estado_nicho == $this->filtroEstado){
+                
+                        if($nicho->tipo_nicho == $this->filtroTipo){
+                        // filtrar por tipo
                         
                         // filtrar por calle
-                        if($nicho->no_calle == $this->filtroCalle){
+                        if($nicho->numero_calle == $this->filtroCalle){
                             // filtrar por avenida
-                            if($nicho->no_ave == $this->filtroAvenida){
+                            if($nicho->numero_avenida == $this->filtroAvenida){
                                 $this->losNichosFiltrados[] = $nicho;
         
                             }
                         }
                     } 
 
-                }
-                // filtrar por estado
+                } 
     
             endforeach;
         }
 
+
     }
 
+ 
 
-    public function filtrarNicho(){
-        // $this->cargarCallesAv();
+    public function filtrosNichos(){
 
         $filtroEstado = $_GET['estado'];
-
-
+        
         if(isset($_GET['tipo'])){
             $this->filtroTipo = $_GET['tipo'] ;
         }
@@ -191,7 +216,7 @@ class adminControlador{
         if(isset($_GET['avenida'])){
             $this->filtroAvenida = $_GET['avenida'];
         }  
-            
+        
 
         switch($filtroEstado){
             case 'disponible':
@@ -208,6 +233,11 @@ class adminControlador{
                 $this->filtroEstado = "todos";
                     
                 break;
+            case 'proceso_exumacion':
+                $this->tituloEstado = "En Proceso de exhumacion";
+                $this->filtroEstado = "proceso_exumacion";
+                    
+                break;
             case 'buscar':
                 $this->verNichosPor = $filtroEstado;
                 if(!($this->verNichosPor == 'filtrar')){
@@ -221,18 +251,25 @@ class adminControlador{
                 break;
                 
         } 
-         
-        // traer los nichos
-        // $this->losNichos = $this->modelo2->verNichos();
-        $this->identificarMenu();
-
-        // recorrer los nichos para llenar losNichosFiltrados
-        $this->filtrarArrNichos();         
 
 
-        require_once "vista/users/admin/index.php";
- 
+        // llenando las avenidas
+        foreach($this->intersecciones as $intersec):
+            if($intersec->numero_calle == $this->filtroCalle){
+                $this->avenidas[] = $intersec;
+            }
+            
+        
+        endforeach;
+
+            // calle por default
+            $this->calleSelected = $this->calles[$this->filtroCalle - 1];
+
+            // avenida por default
+            $this->avenidaSelected = $this->avenidas[$this->filtroAvenida-1];
     
+
+
     }
 
 
@@ -284,41 +321,35 @@ class adminControlador{
     }
                     //todo sobre los nihcos en el admin
     public function identificarMenu() {
-        $this->cargarCallesAv_nichos();
- 
-
+        
+        
         $this->menu = $_SESSION['menu'];
         $this->filtro = $_GET['filtro'];
-
+        
         switch($this->filtro){
             case 1:
                 $this->titulo = "Ver nichos";
                 $this->submenu = "nichos";
+                $this->filtrarNichos();
+                require_once "vista/users/admin/index.php"; 
 
             break;
             case 2:
                 $this->titulo = "Solicitudes de ocupaciones";
                 $this->submenu = "ocupaciones";
-                
-                break;
+                require_once "vista/users/admin/index.php"; 
+        
+            break;
             case 3:
                 $this->titulo = "Solicitudes de exhumaciones";
                 $this->submenu = "exhumaciones";
-                
-                break;
+                require_once "vista/users/admin/index.php"; 
+                    
+                    break;
                 
         }
 
-
-        $_SESSION['titulo'] = $this->titulo;
-
-        // var_d    ump("menu " . $this->menu);
-        // var_dump("submenu " . $this->submenu);
-        // var_dump("titulo " . $this->titulo);
-
-        // exit;
-
-        require_once "vista/users/admin/index.php"; 
+ 
 
     }
 
