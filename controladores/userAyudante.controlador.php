@@ -21,7 +21,7 @@ class userAyudanteControlador{
     private $verNichosPor =  'filtrar';
   
 
-    private $menu = "usuarios" ;
+    private $menu = "captura" ;
     private $submenu = "listar" ;
      
     private $userss;
@@ -40,6 +40,9 @@ class userAyudanteControlador{
 
  
     private $municipios;
+    private $userSelect;
+    private $allUsers;
+    private $causas;
         private $municipioDef = 1;
 
     private $calles;
@@ -49,7 +52,8 @@ class userAyudanteControlador{
     private $calleSelected;
     private $avenidaSelected;
     
-    private $nichoSelect = -1;
+    private bool $nichoSelect = false;
+    private $idNichoSelect;
 
 
     // array("d", "d");
@@ -83,14 +87,14 @@ class userAyudanteControlador{
                      $this->menu = $_SESSION['menu'] ; 
                 }
  
-                if($this->menu == 'nichos'){
+                if($this->menu == 'captura'){
+                    $this->cargarDatos();
                     $this->filtrarNichos();
                 }
 
 
                 require_once "vista/users/ayudante/index.php"; 
                 
-
             }else{
                 
                 header("location:?c=inicio");
@@ -108,27 +112,55 @@ class userAyudanteControlador{
 
 
 
+ 
 
 
 
+    public function verNichos(){
+        $this->nichoSelect = true;
+        $this->filtrarNichos();
+        $this->menu = "captura";
 
-
-
-
-
-
-
-
-
-
-    public function seleccionarNicho(){
+        require_once "vista/users/ayudante/index.php"; 
 
     }
+
+
+
+    public function seleccionarNicho(){ 
+        $this->cargarDatos();
+        $this->menu = "captura";
+
+        $this->nichoSelect = false;
+    
+                // validacionesssss
+
+        if(isset($_GET['id'])){
+            $this->idNichoSelect = $_GET['id'];
+        }
+          
+ 
+        require_once "vista/users/ayudante/index.php"; 
+
+        
+
+    }
+
+
+
 
  
 
     public function buscarNichos(){
-        $this->menu = $_SESSION['menu'];
+
+        if(isset($_GET['menu'])){
+            $this->menu = $_SESSION['menu'];
+        }
+        if(isset($_GET['ver'])){
+            $this->nichoSelect = $_GET['ver'];
+        }
+
+ 
         $this->titulo = "Ver nichos";
         $this->submenu = "nichos";
         $this->verNichosPor = "buscar";
@@ -142,13 +174,22 @@ class userAyudanteControlador{
         $this->losNichosFiltrados[] = $this->modelo2->buscarNicho($codigo);
         
 
-        require_once "vista/users/admin/index.php";
+        require_once "vista/users/ayudante/index.php";
         
 
     }
 
     public function filtrarNichos(){
-        $this->menu = $_SESSION['menu'];
+
+        
+        if(isset($_GET['menu'])){
+            $this->menu = $_SESSION['menu'];
+        }
+        if(isset($_GET['ver'])){
+            $this->nichoSelect = $_GET['ver'];
+        }
+        
+
         $this->titulo = "Ver nichos";
         $this->submenu = "nichos";
 
@@ -161,7 +202,7 @@ class userAyudanteControlador{
             $this->filtrarArrNichos();
         }
         
-        require_once "vista/users/admin/index.php";
+        require_once "vista/users/ayudante/index.php";
 
         // problema al seleccionar de los filtros no cargan los nichosss
 
@@ -169,10 +210,61 @@ class userAyudanteControlador{
 
 
   
-    public function cargarMunicipioEtc(){
-        $this->municipios = $this->modelo2->darTabla("municipio");
+    public function crearContrato(){
+        //insertar persona y ocupante
+        $e = new User();
+  
+        $e->set_nombres1($_POST['nombreUno']);
+        $e->set_nombres2($_POST['nombreDos']);
+        $e->set_apellidos1($_POST['apellidoUno']);
+        $e->set_apellidos2($_POST['apellidoDos']);
+        
+        $e->set_cui($_POST['dpi']);
+        $e->setFecha($_POST['cumple']);
+        $e->setDirr($_POST['dir']);
+        
+        $e->setMunic($_POST['munic']);
+
+        $fechaFall = $_POST['fechaFall'];        
+        $id_causa = $_POST['causa'];        
+        
+        $idCcupante = $this->modelo2->insertPersonaOcupante($e, $fechaFall, $id_causa);
+        var_dump(">>>ocupp: " . $idCcupante); exit;
+
+        
+        //insertar responsable y contrato
+        $userSelect = $_POST['userSelect'];        
+        $telefono = $_POST['telefono'];        
+        $mail = $_POST['mail'];      
+
+        $estado_contrato = $_POST['estado_contrato'];       
+        $nicho = $_POST['nicho'];       
+        
+        $this->modelo2->insertarContrato($userSelect, $telefono, $mail, $estado_contrato, $nicho);
+
+        
+        
+        
+        // var_dump("userID: "  . $userSelect);
+        // var_dump("nicho_id: "  . $nicho);exit;
 
     }
+
+    public function cargarDatos(){
+        $this->municipios = $this->modelo2->darTabla("municipio");
+        $this->causas = $this->modelo2->darTabla("causa_fallecimiento");
+        $allUsers = $this->modelo2->darUsersCui();
+        // $this->allUsers = $this->modelo2->darUsersCui();
+                        // solo usuarios de tipo consulta(user)
+        foreach($allUsers  as $us):
+            if($us->rol == 'user'){
+                $this->allUsers [] = $us ;
+            }
+        endforeach;
+         
+
+    }
+
 
     public function cargarCallesAv_nichos(){
         $this->losNichos = $this->modelo2->darNichos();

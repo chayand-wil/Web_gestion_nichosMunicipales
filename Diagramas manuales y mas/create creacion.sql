@@ -3,9 +3,6 @@ DROP DATABASE if EXISTS sistema_nichos_chayand;
 
 CREATE DATABASE IF NOT EXISTS sistema_nichos_chayand;
 
-
-USE sistema_nichos_chayand;
-
 -- Tabla pais (guatemala)
 CREATE TABLE pais (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -143,13 +140,13 @@ CREATE TABLE nicho (
     FOREIGN KEY (id_ubicacion) REFERENCES ubicacion_nicho(id)
 );
 
--- Tabla responsable_nicho
+-- Tabla responsable_nicho (MODIFICADA: cambiado id_persona por id_user)
 CREATE TABLE responsable_nicho (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    id_persona INT NOT NULL,
+    id_user INT NOT NULL,
     telefono VARCHAR(20) NOT NULL,
     correo_contacto VARCHAR(100),
-    FOREIGN KEY (id_persona) REFERENCES persona(id)
+    FOREIGN KEY (id_user) REFERENCES user(id)
 );
 
 -- Tabla ocupante
@@ -179,8 +176,6 @@ CREATE TABLE contrato (
     FOREIGN KEY (id_responsable) REFERENCES responsable_nicho(id)
 );
 
-
-
 -- Tabla boleta_pago
 CREATE TABLE boleta_pago (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -191,32 +186,10 @@ CREATE TABLE boleta_pago (
     FOREIGN KEY (id_estado_boleta) REFERENCES estado_boleta(id),
     FOREIGN KEY (id_contrato) REFERENCES contrato(id)
 );
+ 
 
--- Tabla solicitud_nicho
-CREATE TABLE solicitud_nicho (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_user INT NOT NULL,
-    id_ocupante INT NOT NULL,
-    id_responsable INT NOT NULL,
-    fecha DATE NOT NULL,
-    id_estado_solicitud INT NOT NULL,
-    FOREIGN KEY (id_user) REFERENCES user(id),
-    FOREIGN KEY (id_ocupante) REFERENCES ocupante(id),
-    FOREIGN KEY (id_responsable) REFERENCES responsable_nicho(id),
-    FOREIGN KEY (id_estado_solicitud) REFERENCES estado_solicitud(id)
-);
 
--- Tabla acuerdo_exhumacion
-CREATE TABLE acuerdo_exhumacion (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    id_nicho INT NOT NULL,
-    id_ente_autorizador INT NOT NULL,
-    fecha DATE NOT NULL,
-    id_motivoExhumacion INT NOT NULL,
-    FOREIGN KEY (id_nicho) REFERENCES nicho(id),
-    FOREIGN KEY (id_ente_autorizador) REFERENCES ente_autorizador(id),
-    FOREIGN KEY (id_motivoExhumacion) REFERENCES motivoExhumacion(id)
-);
+
 
 -- Insertar datos de ejemplo para las tablas de estados y tipos
 INSERT INTO pais (nombre) VALUES 
@@ -302,10 +275,187 @@ DELIMITER ;
 
 
 
+ 
+
+
+DELIMITER //
+
+CREATE PROCEDURE insertar_persona_y_ocupante(
+    IN pNombre VARCHAR(50),
+    IN sNombre VARCHAR(50),
+    IN pApe VARCHAR(50),
+    IN sApe VARCHAR(50),
+    IN cui VARCHAR(20),
+    IN fecha DATE,
+    IN dirr TEXT,
+    IN munic INT,
+    IN fechaFallecimiento DATE,
+    IN causaFallecimiento INT
+)
+BEGIN
+    DECLARE id_persona_new INT;
+    
+    DECLARE exit handler for SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Error en la transacción. No se pudo completar la operación.';
+    END;
+
+    START TRANSACTION;
+    
+    -- Insertar la persona
+    INSERT INTO persona (
+        primer_nombre,
+        segundo_nombre,
+        primer_apellido,
+        segundo_apellido,
+        dpi,
+        fecha_cumpleanos,
+        direccion,
+        id_municipio
+    ) VALUES (
+        pNombre,
+        sNombre,
+        pApe,
+        sApe,
+        cui,
+        fecha,
+        dirr,
+        munic
+    );
+    
+    -- Obtener el ID de la persona recién insertada
+    SET id_persona_new = LAST_INSERT_ID();
+    
+    -- Insertar el ocupante
+    INSERT INTO ocupante (
+        id_persona,
+        fecha_fallecimiento,
+        id_causa_fallecimiento
+    ) VALUES (
+        id_persona_new,
+        fechaFallecimiento,
+        causaFallecimiento
+    );
+    
+    COMMIT;
+    
+    -- Devolver los IDs generados
+    SELECT id_persona_new AS id_persona, LAST_INSERT_ID() AS id_ocupante;
+    
+END //
+
+DELIMITER ;
 
 
 
 
+
+
+
+
+DELIMITER //
+
+CREATE PROCEDURE sp_insertar_responsable_contrato(
+    -- Parámetros para responsable_nicho
+    IN p_id_user INT,
+    IN p_telefono VARCHAR(20),
+    IN p_correo_contacto VARCHAR(100),
+    
+    -- Parámetros para contrato
+    IN p_id_nicho INT,
+    IN p_id_estado_contrato INT,
+    IN p_fecha_inicio_contrato DATE,
+    IN p_fecha_finalizacion DATE,
+    IN p_id_ocupante INT
+)
+BEGIN
+    DECLARE v_id_responsable INT;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- En caso de error, hacer rollback
+        ROLLBACK;
+        SIGNAL SQLSTATE '45000' 
+        SET MESSAGE_TEXT = 'Error al ejecutar el procedimiento sp_insertar_responsable_contrato';
+    END;
+
+    -- Iniciar transacción
+    START TRANSACTION;
+    
+    -- Insertar el responsable del nicho
+    INSERT INTO responsable_nicho (id_user, telefono, correo_contacto)
+    VALUES (p_id_user, p_telefono, p_correo_contacto);
+    
+    -- Obtener el ID del responsable recién insertado
+    SET v_id_responsable = LAST_INSERT_ID();
+    
+    -- Insertar el contrato utilizando el ID del responsable
+    INSERT INTO contrato (
+        id_nicho,
+        id_user,
+        id_estado_contrato,
+        fecha_incio_contrato,
+        fecha_finalizacion,
+        id_ocupante,
+        id_responsable
+    ) VALUES (
+        p_id_nicho,
+        p_id_user,
+        p_id_estado_contrato,
+        p_fecha_inicio_contrato,
+        p_fecha_finalizacion,
+        p_id_ocupante,
+        v_id_responsable
+    );
+    
+    -- Confirmar la transacción
+    COMMIT;
+END //
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CALL insertar_persona_y_usuario(
+    'Wilson', 'Jo', 'C', 'San',
+    '12345675290101111', '1990-05-01', 'Zona 1, Ciudad', 1,
+    'admin@mail.com', '$2y$10$J8fGDFkvClj31KULjo34p.fKhS0rQs9p0.QsfsJoVWiDrV.rYgIay', 1
+);
+
+CALL insertar_persona_y_usuario(
+    'jon', 'Jo', 'C', 'San',
+    '12345785290101111', '1990-05-01', 'Zona 1, Ciudad', 1,
+    'ayudante@mail.com', '$2y$10$J8fGDFkvClj31KULjo34p.fKhS0rQs9p0.QsfsJoVWiDrV.rYgIay', 2
+);
+
+CALL insertar_persona_y_usuario(
+    'Chayan', 'Jo', 'C', 'San',
+    '12345678101111', '1990-05-01', 'Zona 1, Ciudad', 1,
+    'auditor@mail.com', '$2y$10$J8fGDFkvClj31KULjo34p.fKhS0rQs9p0.QsfsJoVWiDrV.rYgIay', 3
+);
+CALL insertar_persona_y_usuario(
+    'SanC', 'Jo', 'C', 'San',
+    '12345450101111', '1990-05-01', 'Zona 1, Ciudad', 1,
+    'user@mail.com', '$2y$10$J8fGDFkvClj31KULjo34p.fKhS0rQs9p0.QsfsJoVWiDrV.rYgIay', 4
+);
 
 
 
@@ -322,9 +472,5 @@ DELIMITER ;
 
 
 
-CALL insertar_persona_y_usuario(
-    'Wilson', 'Jo', 'C', 'San',
-    '1234567890101111', '1990-05-01', 'Zona 1, Ciudad', 1,
-    'jo@mail.com', '$2y$10$J8fGDFkvClj31KULjo34p.fKhS0rQs9p0.QsfsJoVWiDrV.rYgIay', 1
-);
+
 

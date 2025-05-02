@@ -23,7 +23,7 @@
  
              
  
-    <div class="form-container">
+<div class="form-container">
     <!-- <h2>Registro de Usuario</h2> -->
 <form action="?c=registro&a=insertarUser" method="POST">
 

@@ -167,7 +167,6 @@ class User{
  
     }
     public function darTabla($tabla) {
-
         try{
             // retornar las calles
             $sql = "SELECT * FROM " .  $tabla . ";" ;
@@ -182,8 +181,116 @@ class User{
             exit;
             // header("location:?c=user");
         }
- 
     }
+
+
+
+    public function insertarContrato($userSelect, $telefono, $mail, $estado_contrato, $nicho ) {
+        // $userSelect = $_GET['userSelect'];        
+        // $telefono = $_GET['telefono'];        
+        // $mail = $_GET['mail'];      
+
+        // $estado_contrato = $_GET['estado_contrato'];       
+        // $nicho = $_GET['nicho'];      // Preparar la llamada al procedimiento almacenado
+ 
+    try {
+
+        // Preparar la llamada al procedimiento almacenado
+        $sql = "CALL sp_insertar_responsable_contrato(
+            :id_user, 
+            :telefono, 
+            :correo_contacto,
+            :id_nicho,
+            :id_estado_contrato,
+            :fecha_inicio_contrato,
+            :fecha_finalizacion,
+            :id_ocupante
+        )";
+        
+        
+        $stmt = $this->pdo->prepare($sql);
+
+        $stmt->bindParam(':id_user', $user->get_nombres1(), PDO::PARAM_STR);
+        $stmt->bindParam(':telefono', $user->get_nombres2(), PDO::PARAM_STR);
+        $stmt->bindParam(':correo_contacto', $user->get_apellidos1(), PDO::PARAM_STR);
+        $stmt->bindParam(':id_nicho', $user->get_apellidos2(), PDO::PARAM_STR);
+        
+        $stmt->bindParam(':id_estado_contrato', $user->get_cui(), PDO::PARAM_INT);
+        $stmt->bindParam(':fecha_inicio_contrato', $user->getFecha(), PDO::PARAM_STR);
+        $stmt->bindParam(':fecha_finalizacion', $user->getDirr(), PDO::PARAM_STR);
+        $stmt->bindParam(':id_ocupante', $user->getMunic(), PDO::PARAM_STR);
+        
+        $stmt->bindParam(':fechaFall', $fechaFall, PDO::PARAM_STR);
+        $stmt->bindParam(':idCausa', $id_causa, PDO::PARAM_STR);
+
+        // Ejecutar la consulta
+        $stmt->execute();
+        $lastInsertId = $this->pdo->lastInsertId();
+
+        return $lastInsertId;
+
+  
+    } catch (PDOException $e) {
+        //   var_dump("tryy: " . $e->getMessage()); exit;
+        // echo "Error al insertar persona y ocupante: " . $e->getMessage();
+
+        return $e;
+
+        exit;
+    }
+
+
+
+
+
+
+    }
+
+
+
+
+    public function darUsersCui() {
+        try{
+            // retornar las calles
+            $sql = "SELECT 
+                u.id AS id_usuario,
+                u.mail,
+                u.password,
+                
+                r.rol AS rol,
+                
+                p.id AS id_persona,
+                p.primer_nombre,
+                p.segundo_nombre,
+                p.primer_apellido,
+                p.segundo_apellido,
+                p.dpi,
+                p.fecha_cumpleanos,
+                p.direccion,
+                p.id_municipio
+
+            FROM 
+                user u
+            JOIN 
+                rol_user r ON u.id_rol = r.id
+            JOIN 
+                persona p ON u.id_persona = p.id;
+                                                        " ;
+            
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        }catch(PDOException $e){
+            echo "Error al dar tabla: " . $e->getMessage();
+            exit;
+            // header("location:?c=user");
+        }
+    }
+
+
 
     public function buscarNicho($id) {
         //consulta que devuelva 
@@ -314,9 +421,7 @@ class User{
     public function insertUsuario($user) {
 
         try {
-            // $sql = "INSERT INTO usuario (id_rol, user, password) VALUES (:id_rol, :user, :password)";
- 
-          
+
             $sql = "CALL insertar_persona_y_usuario(
                 :pNombre, :sNombre, :pApe, :sApe,
                 :cui, :fecha, :dirr, :munic,
@@ -351,6 +456,7 @@ class User{
 
             // $lastInsertId = $this->pdo->lastInsertId();
 
+
             return "yes";
       
         } catch (PDOException $e) {
@@ -362,82 +468,55 @@ class User{
         }
     }
 
-    
 
 
+    public function insertPersonaOcupante($user, $fechaFall, $id_causa) {  
+        try {
+
+            // Preparar la llamada al procedimiento almacenado
+            $sql = "CALL insertar_persona_y_ocupante(
+                :pNombre, :sNombre, :pApe, :sApe,
+                :cui, :fecha, :dirr, :munic,
+                :fechaFall, :idCausa
+            );";
+            
+            
+            $stmt = $this->pdo->prepare($sql);
+
+            $stmt->bindParam(':pNombre', $user->get_nombres1(), PDO::PARAM_STR);
+            $stmt->bindParam(':sNombre', $user->get_nombres2(), PDO::PARAM_STR);
+            $stmt->bindParam(':pApe', $user->get_apellidos1(), PDO::PARAM_STR);
+            $stmt->bindParam(':sApe', $user->get_apellidos2(), PDO::PARAM_STR);
+            
+            $stmt->bindParam(':cui', $user->get_cui(), PDO::PARAM_INT);
+            $stmt->bindParam(':fecha', $user->getFecha(), PDO::PARAM_STR);
+            $stmt->bindParam(':dirr', $user->getDirr(), PDO::PARAM_STR);
+            $stmt->bindParam(':munic', $user->getMunic(), PDO::PARAM_STR);
+            
+            $stmt->bindParam(':fechaFall', $fechaFall, PDO::PARAM_STR);
+            $stmt->bindParam(':idCausa', $id_causa, PDO::PARAM_STR);
+
+            // Ejecutar la consulta
+            $stmt->execute();
+            $lastInsertId = $this->pdo->lastInsertId();
  
-    
-    
-    public function insertarAsistencia($idUser, $idPub){     
-            try{
-                $sql = " CALL insertarAsistencia(:idUser, :idPub);
-                ";
-                $stmt = $this->pdo->prepare($sql);
-                $stmt->bindParam(':idUser', $idUser);
-                $stmt->bindParam(':idPub', $idPub);
-                
-                // Ejecutar la consulta
-                $stmt->execute();
-        
-                // header("location:?c=user");
-        
-                // echo "Evento insertado correctamente!";
-            }catch(PDOException $e){
-                echo "Error al insertar publicacion: " . $e->getMessage();
-                exit;
-                // header("location:?c=user");
-            }
-        
-        
-
-        
-    }   
-
-
-    public function verificarAsistencia($idUser, $idPub){     
-        try {
-            $sql = "SELECT EXISTS (
-                        SELECT 1
-                        FROM asistencia
-                        WHERE id_usuario = :id_usuario AND id_publicacion = :id_publicacion
-                    ) AS es_asistente";
-        
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(':id_usuario', $idUser, PDO::PARAM_INT);
-            $stmt->bindParam(':id_publicacion', $idPub, PDO::PARAM_INT);
-        
-            $stmt->execute();
-            $resultado = $stmt->fetch(PDO::FETCH_ASSOC);
-        
-            return (bool)$resultado['es_asistente']; // Retorna true o false
+            return $lastInsertId;
+ 
+      
         } catch (PDOException $e) {
-            echo "Error: " . $e->getMessage();
-            return false;
+            //   var_dump("tryy: " . $e->getMessage()); exit;
+            // echo "Error al insertar persona y ocupante: " . $e->getMessage();
+
+            return $e;
+
+            exit;
         }
-    }   
-
-    public function retirarAsistencia($idUser, $idPub){     
-        try {
-            $sql = "CALL retirar_asistencia(:id_user, :id_publicacion)";
-    
-            $stmt = $this->pdo->prepare($sql);
-            $stmt->bindParam(':id_user', $idUser, PDO::PARAM_INT);
-            $stmt->bindParam(':id_publicacion', $idPub, PDO::PARAM_INT);
-    
-            $stmt->execute();
-            // return true; // Éxito
-        } catch (PDOException $e) {
-            echo "Error al retirar asistencia: " . $e->getMessage();
-            return false;
-        }
-    }   
-    
-
+    }
 
     
 
 
-
+  
 
 
     
@@ -505,15 +584,7 @@ public function delete_user($id_user){
 
 
 
-
  
-
-
-
-
-
- 
-
  
  public function insertarReporte($publicacionId, $idMotivo, $idReportador){
 
@@ -539,31 +610,7 @@ public function delete_user($id_user){
     }
 }
 
-
-
-public function insertarReporte_user($publicacionId, $idMotivo, $idReportador){
-
-
-    try{
-        $sql = "INSERT INTO reporte_pub (id_user, id_motivo, id_reportador, fecha_report) 
-                VALUES (:publicacionId, :idMotivo, :idReportador, NOW())";
-            
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':publicacionId', $publicacionId);
-        $stmt->bindParam(':idMotivo', $idMotivo);
-        $stmt->bindParam(':idReportador', $idReportador);
-         
-
-        // Ejecutar la consulta
-        $stmt->execute();
  
-        // echo "Evento insertado correctamente!";
-    }catch(PDOException $e){
-        echo "Error al insertar reporte: " . $e->getMessage();
-        exit;
-        // header("location:?c=user");
-    }
-}
  
 
 public function insertarMotivo($motivo){
@@ -593,98 +640,9 @@ public function insertarMotivo($motivo){
 
 
 
-
-
-public function obtenerEventosAsistente($idUser) {
  
-    try {
-        $sql = "SELECT 
-                    p.id_publicacion,
-                    p.titulo,
-                    p.imgdir,
-                    p.lugar,
-                    p.fecha_hora,
-                    p.descripcion,
-                    p.cantidad_asistentes,
-                    c.nombre_categoria AS categoria,
-                    t.descripcion_publico AS tipo_publico,
-                    e.nombre_estado AS estado
-                FROM
-                    asistencia a
-                JOIN 
-                    publicacion p ON a.id_publicacion = p.id_publicacion
-                JOIN 
-                    categorias c ON p.id_cat = c.id_categoria
-                JOIN 
-                    tipo t ON p.id_tipo = t.id_tipo
-                JOIN 
-                    estado e ON p.id_estado = e.id_estado
-                WHERE 
-                    a.id_usuario = :id_user
-                ORDER BY 
-                    ABS(TIMESTAMPDIFF(SECOND, NOW(), p.fecha_hora)) ASC;
-                ";
 
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':id_user', $idUser, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        // return $stmt->fetchAll(PDO::FETCH_ASSOC); // Devuelve un array de eventos
-        return $stmt->fetchAll(PDO::FETCH_OBJ);
-
-        
-    } catch (PDOException $e) {
-        echo "Error al obtener eventos: " . $e->getMessage();
-        return [];
-    }
-}
-
-
-
-public function eventoMasProximo($idUser) {
  
-    try {
-        $sql = "SELECT 
-                    p.id_publicacion,
-                    p.titulo,
-                    p.lugar,
-                    p.fecha_hora,
-                    p.descripcion,
-                    p.cantidad_asistentes,
-                    c.nombre_categoria AS categoria,
-                    t.descripcion_publico AS tipo_publico,
-                    e.nombre_estado AS estado
-                FROM
-                    asistencia a
-                JOIN 
-                    publicacion p ON a.id_publicacion = p.id_publicacion
-                JOIN 
-                    categorias c ON p.id_cat = c.id_categoria
-                JOIN 
-                    tipo t ON p.id_tipo = t.id_tipo
-                JOIN 
-                    estado e ON p.id_estado = e.id_estado
-                WHERE 
-                    a.id_usuario = :id_user
-                ORDER BY 
-                    ABS(TIMESTAMPDIFF(SECOND, NOW(), p.fecha_hora)) ASC;
-                ";
-
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':id_user', $idUser, PDO::PARAM_INT);
-        $stmt->execute();
-        
-        // return $stmt->fetchAll(PDO::FETCH_ASSOC); // Devuelve un array de eventos
-        return $stmt->fetch(PDO::FETCH_OBJ);
-
-        
-    } catch (PDOException $e) {
-        echo "Error al obtener eventos: " . $e->getMessage();
-        return [];
-    }
-}
-    
-
 
 
 
