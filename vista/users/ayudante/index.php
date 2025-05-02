@@ -1,6 +1,4 @@
-
-<?php include '/opt/lampp/htdocs/Web_gestion_nichosMunicipales/vista/users/header.php' ?>
-
+ 
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -11,22 +9,34 @@
 
 <style>
 
- 
- 
-
+  
 
 </style>
 
 
-
-
-
+ 
 </head>
 <body>
 
 <?php include 'header.php'; ?>
 
-<?php include 'historia_sesiones.php'; ?>
+
+<h1>Creacion de contrato de un nicho</h1>
+<?php if($this->nichoSelected == -1): ?>
+    
+    <?php include 'nichos.php'; ?>
+    
+<?php endif; ?>
+
+
+
+<br> 
+<br> 
+<br>   
+ 
+
+
+
 
 
 

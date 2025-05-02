@@ -57,16 +57,14 @@ h2 {
     <div class="card">
         <h2>Información del Usuario</h2>
         <div class="user-info">
-            <p><strong>CUI:</strong> <?= $eq->id_cui; ?> <span id="cui"></span></p>
-            <p><strong>Usuario:</strong> <?= $eq->username; ?><span id="username"></span></p>
+            <p><strong>CUI:</strong> <?= $eq->id; ?> <span id="cui"></span></p>
+            <p><strong>Mail:</strong> <?= $eq->mail; ?><span id="username"></span></p>
             <p><strong>Nombre:</strong> <?= $eq->nombres; ?><span id="nombres"></span></p>
             <p><strong>Apellido:</strong> <?= $eq->apellidos; ?><span id="apellidos"></span></p>
             <p><strong>Calle Asignada:</strong> calle<span id="calle"></span></p>
-            <p><strong>Rol:</strong> <?= $eq->rol; ?><span id="rol"></span></p>
-            <p><strong>Estado:</strong><?= $eq->estado; ?> <span id="estado"></span></p>
-            <button>Cambiar estado </button>
+            <p><strong>Rol:</strong> <?= $eq->Rol; ?><span id="rol"></span></p>
 
-            <button onclick="eliminarUser('?c=admin&a=eliminarUserC&filtro=1', '<?= $eq->id_cui?>' )" >Eliminar </button>
+            <button onclick="eliminarUser('?c=admin&a=eliminarUserC&filtro=1', '<?= $eq->id?>' )" >Eliminar </button>
 
 
         </div>

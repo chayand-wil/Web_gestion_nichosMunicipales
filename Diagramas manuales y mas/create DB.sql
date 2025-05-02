@@ -117,7 +117,9 @@ CREATE TABLE user (
     mail VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
     id_rol INT NOT NULL,
-    FOREIGN KEY (id_rol) REFERENCES rol_user(id)
+    id_persona INT NOT NULL,
+    FOREIGN KEY (id_rol) REFERENCES rol_user(id),
+    FOREIGN KEY (id_persona) REFERENCES persona(id)
 );
 
 -- Tabla ubicacion_nicho
@@ -176,6 +178,8 @@ CREATE TABLE contrato (
     FOREIGN KEY (id_ocupante) REFERENCES ocupante(id),
     FOREIGN KEY (id_responsable) REFERENCES responsable_nicho(id)
 );
+
+
 
 -- Tabla boleta_pago
 CREATE TABLE boleta_pago (
@@ -255,13 +259,72 @@ INSERT INTO motivoExhumacion (motivo) VALUES
 
 
 
+DELIMITER $$
+
+CREATE PROCEDURE insertar_persona_y_usuario (
+    IN p_primer_nombre VARCHAR(50),
+    IN p_segundo_nombre VARCHAR(50),
+    IN p_primer_apellido VARCHAR(50),
+    IN p_segundo_apellido VARCHAR(50),
+    IN p_dpi VARCHAR(20),
+    IN p_fecha_cumpleanos DATE,
+    IN p_direccion TEXT,
+    IN p_id_municipio INT,
+    
+    IN p_mail VARCHAR(100),
+    IN p_password VARCHAR(255),
+    IN p_id_rol INT
+)
+BEGIN
+    DECLARE nuevo_id_persona INT;
+
+    -- Insertar en persona
+    INSERT INTO persona (
+        primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
+        dpi, fecha_cumpleanos, direccion, id_municipio
+    ) VALUES (
+        p_primer_nombre, p_segundo_nombre, p_primer_apellido, p_segundo_apellido,
+        p_dpi, p_fecha_cumpleanos, p_direccion, p_id_municipio
+    );
+
+    -- Obtener el ID insertado
+    SET nuevo_id_persona = LAST_INSERT_ID();
+
+    -- Insertar en user
+    INSERT INTO user (
+        mail, password, id_rol, id_persona
+    ) VALUES (
+        p_mail, p_password, p_id_rol, nuevo_id_persona
+    );
+END$$
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+
 
 -- echo password_hash('admin123', PASSWORD_DEFAULT);
 
-INSERT INTO user (mail, password, id_rol) 
-VALUES
-('wilson', '$2y$10$J8fGDFkvClj31KULjo34p.fKhS0rQs9p0.QsfsJoVWiDrV.rYgIay', 1);
+-- INSERT INTO user (mail, password, id_rol) 
+-- VALUES
+-- ('wilson', '$2y$10$J8fGDFkvClj31KULjo34p.fKhS0rQs9p0.QsfsJoVWiDrV.rYgIay', 1);
 
 -- ('234567', 'jon', SHA2('dos', 256), 'Jon', 'Lopez', NULL, 2, 3),
 -- ('345678', 'chayan', SHA2('tres', 256), 'Chayan', 'Mendez', NULL, 3, 3);
+
+
+
+CALL insertar_persona_y_usuario(
+    'Wilson', 'Jo', 'C', 'San',
+    '1234567890101111', '1990-05-01', 'Zona 1, Ciudad', 1,
+    'jo@mail.com', '$2y$10$J8fGDFkvClj31KULjo34p.fKhS0rQs9p0.QsfsJoVWiDrV.rYgIay', 1
+);
 

@@ -1,7 +1,5 @@
 
-
-
-
+ 
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -17,6 +15,19 @@
 .mensaje-error {
     background-color: #f8d7da; /* Rojo claro */
     color: #721c24; /* Rojo oscuro */
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin: 10px 0;
+    border: 1px solid #f5c6cb; /* Borde rojo claro */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+    animation: fadeIn 0.5s ease-out; /* Animación para que aparezca suavemente */
+}
+.mensaje-succes {
+    background-color: #f8d7da; /* Rojo claro */
+    color:rgb(15, 203, 125); /* Rojo oscuro */
     padding: 15px;
     border-radius: 8px;
     font-size: 16px;
@@ -70,6 +81,24 @@
                     <?php unset($_SESSION['error']); // no mostrar nuevamente ?>
                 <?php endif; ?>
 
+
+                <?php if(isset($_SESSION['mensaje_registro_error'])): ?>
+                    <div class="mensaje-error">
+                        <?= $_SESSION['mensaje_registro_error']?>
+                    </div>
+                    <?php unset($_SESSION['mensaje_registro_error']); // no mostrar nuevamente ?>
+                <?php endif; ?>
+
+
+                <?php if(isset($_SESSION['mensaje_registro_succes'])): ?>
+                    <div class="mensaje-succes">
+                        <?= $_SESSION['mensaje_registro_succes']?>
+                    </div>
+                    <?php unset($_SESSION['mensaje_registro_succes']); // no mostrar nuevamente ?>
+                <?php endif; ?>
+
+
+                
                 <div class="mb-3">
                     <label for="username" class="form-label">Nombre de usuario</label>
                     <input type="text" class="form-control" id="username" name="username" placeholder="Escriba su nombre de usuario" required>

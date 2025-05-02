@@ -1,202 +1,389 @@
 <?php
+
   session_start();
 
 
+require_once "modelos/Publicacion.php";
 require_once "modelos/User.php";
-require_once "modelos/Session.php";
-
 
 class userAyudanteControlador{
-    // private $titulo = "Aceptadas";
+
+     
     private $modelo;
     private $modelo2;
-    private $modelo3;
+    
     private $currentId;
-    // private $filtroReporte = "Sin revision";
-    // private $filtro = 2;
-    private $pubs;
+    private $titulo = "Aceptadas";
+    private $filtro = 2;
+    private $reportes;
     private $condicionRep = 1 ;
-    private $id_user;
-    private $asiste = false;
-    private $vista = "home";    //mis_eventos
-    private $fechaProx;   
-    private $filtroPublico = "carga";   
-    private $filtroCategoria = "nofilter";   
 
+    private $verNichosPor =  'filtrar';
+  
 
-    private $modo = "carga";   
+    private $menu = "usuarios" ;
+    private $submenu = "listar" ;
+     
+    private $userss;
+    
+    private $tituloEstado = "Todos los Nichos";
+    private $filtroEstado = "todos";
+    private $filtroTipo = "ninio";
+
+    private $filtroCalle = 1;
+    private $filtroAvenida = 1;
 
  
+    private $losNichos;
+    private $losNichosFiltrados;
+    private $nichoEncontrado;
+
+ 
+    private $municipios;
+        private $municipioDef = 1;
+
+    private $calles;
+    private $avenidas;
+    private $intersecciones;
+
+    private $calleSelected;
+    private $avenidaSelected;
+    
+    private $nichoSelect = -1;
 
 
-
-
+    // array("d", "d");
+    
+ 
     public function __CONSTRUCT(){
-        $this->modelo = new User;
-        $this->modelo2 = new Session;
-        $this->modelo3 = new Session;
-    }
+        $this->modelo2 = new User;
 
+
+    }
+ 
+
+ 
  
 
     public function Inicio(){
+        // $this->filtrarPublications($this->filtro);
 
-        
         if (isset($_SESSION['username'])) {
-            if($_SESSION['role']==2){
-                $this->id_user = $_SESSION['id'];
-                // var_dump("iduserr: " . $this->id_user);
-                // exit;
+            $rol = $_SESSION['role']; 
                 
-                if (isset($_GET['vista'])) {
-                    $this->vista = $_GET['vista'];
-                }
-                
-                if (isset($_SESSION['ftipo'])) {
-                    $this->filtroPublico = $_SESSION['ftipo'];
-                }
-
-                if (isset($_SESSION['fcategoria'])) {
-                    $this->filtroCategoria = $_SESSION['fcategoria'];
-                    //  unset($_SESSION['fcategoria']); // no mostrar nuevamente 
-                }
-
-                
-                if (isset($_GET['ftipo'])) {
-                    $_SESSION['ftipo'] = $_GET['ftipo'];
-                    $this->filtroPublico = $_SESSION['ftipo'];
-                }
-
-                if (isset($_GET['fcategoria'])) {
-                    $_SESSION['fcategoria'] = $_GET['fcategoria'];
-                    $this->filtroCategoria = $_SESSION['fcategoria'];
-                }
-
- 
-                require_once "vista/users/ayudante/index.php"; 
-
-                
+            if($rol==2){
                 // header("location:?c=admin");
+
+                if(isset($_SESSION['menu'])){
+                     $this->menu = $_SESSION['menu'] ; 
+                }
+
+                if(isset($_GET['menu'])){
+                     $_SESSION['menu'] = $_GET['menu'];   
+                     $this->menu = $_SESSION['menu'] ; 
+                }
+ 
+                if($this->menu == 'nichos'){
+                    $this->filtrarNichos();
+                }
+
+
+                require_once "vista/users/ayudante/index.php"; 
+                
+
             }else{
+                
                 header("location:?c=inicio");
+                exit;
             }
             
         } else {
             header("location:?c=inicio");
+            exit;
         }
-        exit(); 
  
-        
-        // $this->filtrarPublications($this->filtro);
-
-
-        // require_once "vista/users/admin/revision.php"; 
-        // exit(); 
-        // require_once "vista/encabezado.php";
-        // require_once "vista/topsJugadores/index.php";
-        // require_once "vista/pie.php";
     }
-  
-    
-
-
  
 
 
 
 
-    
-    public function newIteration(){
-        // / Establecer la zona horaria de Guatemala
-        date_default_timezone_set('America/Guatemala');
-        // Si la variable de sesión aún no está definida, asignar la hora actual
-        if (!isset($_SESSION['hora_inicio_iteracion'])) {
-            $_SESSION['hora_inicio_iteracion'] = date("Y-m-d H:i:s");
-        }
-        // Para verificar, puedes imprimirla (quítalo en producción)
-        $horaGuardada = $_SESSION['hora_inicio_iteracion'];
- 
-            $id = $_SESSION['id_session'];
-            $entrada =$_GET['param'];
- 
-            $hora = $_SESSION['hora_inicio_iteracion'];
-
-            $idIteracion = $this->modelo3->insertIteracion_db($id, $entrada, $hora);
 
 
-            $_SESSION['id_iteracion'] = $idIteracion;
-  
-        require_once "vista/users/user/monitoreo.php"; 
-        exit;
-        
+
+
+
+
+
+
+
+
+
+
+
+    public function seleccionarNicho(){
+
     }
 
+ 
 
+    public function buscarNichos(){
+        $this->menu = $_SESSION['menu'];
+        $this->titulo = "Ver nichos";
+        $this->submenu = "nichos";
+        $this->verNichosPor = "buscar";
+        $this->tituloEstado = "Resultados de la busqueda";
+        $this->cargarCallesAv_nichos();
+        $this->filtrosNichos();
 
-
-
-
-    public function insertarSession(){
         
-        // / Establecer la zona horaria de Guatemala
-        date_default_timezone_set('America/Guatemala');
-        // Si la variable de sesión aún no está definida, asignar la hora actual
-        if (!isset($_SESSION['hora_inicio_session'])) {
-            $_SESSION['hora_inicio_session'] = date("Y-m-d H:i:s");
-        }
-        // Para verificar, puedes imprimirla (quítalo en producción)
-        $horaGuardada = $_SESSION['hora_inicio_session'];
+        $codigo= $_GET['codigo'];
+        $this->losNichosFiltrados = [];
+        $this->losNichosFiltrados[] = $this->modelo2->buscarNicho($codigo);
+        
 
+        require_once "vista/users/admin/index.php";
+        
+
+    }
+
+    public function filtrarNichos(){
+        $this->menu = $_SESSION['menu'];
+        $this->titulo = "Ver nichos";
+        $this->submenu = "nichos";
+
+        $this->cargarCallesAv_nichos();
+        $this->filtrosNichos();
+        if($this->verNichosPor == 'buscar'){
+            $losNichosFiltrados = [];
+            
+        }else{
+            $this->filtrarArrNichos();
+        }
+        
+        require_once "vista/users/admin/index.php";
+
+        // problema al seleccionar de los filtros no cargan los nichosss
+
+    }
+
+
+  
+    public function cargarMunicipioEtc(){
+        $this->municipios = $this->modelo2->darTabla("municipio");
+
+    }
+
+    public function cargarCallesAv_nichos(){
+        $this->losNichos = $this->modelo2->darNichos();
+
+        // cargar las calles
+        $this->calles = $this->modelo2->darCalles();
+
+        //cargar las intersecciones
+        $this->intersecciones = $this->modelo2->darIntersecciones();
+
+        
+    }
+
+
+    public function filtrarArrNichos(){
+        if($this->filtroEstado == 'todos'){
+
+                                            // filtrar por tipo
+            foreach($this->losNichos as $nicho):
+                // filtrar por tipo
+                if($nicho->tipo_nicho == $this->filtroTipo){
+    
+                        // filtrar por calle
+                        if($nicho->numero_calle == $this->filtroCalle){
+                            // filtrar por avenida
+                            if($nicho->numero_avenida == $this->filtroAvenida){
+                                $this->losNichosFiltrados[] = $nicho;
+        
+                            }
+                        }
+                    }
+
+            endforeach;
+             
+            
+        }else{
+            foreach ($this->losNichos as $nicho):
+                
+                // filtrar por estado
+                if($nicho->estado_nicho == $this->filtroEstado){
+                
+                        if($nicho->tipo_nicho == $this->filtroTipo){
+                        // filtrar por tipo
+                        
+                        // filtrar por calle
+                        if($nicho->numero_calle == $this->filtroCalle){
+                            // filtrar por avenida
+                            if($nicho->numero_avenida == $this->filtroAvenida){
+                                $this->losNichosFiltrados[] = $nicho;
+        
+                            }
+                        }
+                    } 
+
+                } 
+    
+            endforeach;
+        }
+
+
+    }
 
  
-        if(!isset($_SESSION['id_session'])){
 
-            $newSession = new Session;          
-            
-            $newSession->set_id_usuario($_SESSION['id']);
-            
-            $newSession->set_hora_inicio($_SESSION['hora_inicio_session']);
-            
-            $idss = $this->modelo2->insertSesion_db($newSession);
-            
-            $_SESSION['id_session'] = $idss;
+    public function filtrosNichos(){
 
+        $filtroEstado = $_GET['estado'];
+        
+        if(isset($_GET['tipo'])){
+            $this->filtroTipo = $_GET['tipo'] ;
+        }
+        if(isset($_GET['calle'])){
+            $this->filtroCalle = $_GET['calle'];
+        }
+        
+        if(isset($_GET['avenida'])){
+            $this->filtroAvenida = $_GET['avenida'];
+        }  
+        
 
+        switch($filtroEstado){
+            case 'disponible':
+                $this->tituloEstado = "Nichos Disponibles";
+                $this->filtroEstado = "disponible";
+            break;
+            case 'ocupado':
+                $this->tituloEstado = "Nichos ocupados";
+                $this->filtroEstado = "ocupado";
+                break;
+
+            case 'todos':
+                $this->tituloEstado = "Todos los Nichos";
+                $this->filtroEstado = "todos";
+                    
+                break;
+            case 'proceso_exumacion':
+                $this->tituloEstado = "En Proceso de exhumacion";
+                $this->filtroEstado = "proceso_exumacion";
+                    
+                break;
+            case 'buscar':
+                $this->verNichosPor = $filtroEstado;
+                if(!($this->verNichosPor == 'filtrar')){
+                    $this->tituloEstado = "Resultados de la busqueda";
+                }
+
+                break;
+
+            default:
+
+                break;
+                
         } 
- 
+
+
+        // llenando las avenidas
+        foreach($this->intersecciones as $intersec):
+            if($intersec->numero_calle == $this->filtroCalle){
+                $this->avenidas[] = $intersec;
+            }
+            
         
+        endforeach;
+
+            // calle por default
+            $this->calleSelected = $this->calles[$this->filtroCalle - 1];
+
+            // avenida por default
+            $this->avenidaSelected = $this->avenidas[$this->filtroAvenida-1];
+    
+
+
     }
 
 
- 
 
 
 
 
 
+    // public function filtrar(){
+    //     $this->identificarFiltros();
+        
+    //     $_SESSION['titulo'] = $this->titulo;
 
- 
-     
-
-
- 
- 
-    
-
- 
- 
-
-
+    //     require_once "vista/users/admin/index.php"; 
+        
+    // }
     
 
 
 
+                                                            //ADMIN 
+    // public function identificarFiltros() {
+    //     $this->filtro = $_GET['filtro'];
 
+    //     switch($this->filtro){
+    //         case 1:
+    //             $this->titulo = "Agregar un usuario";
+    //             $this->submenu = "agregar";
+    //             $this->cargarMunicipioEtc();
+    //         break;
+    //         case 2:
+    //             $this->titulo = "Usuarios disponibles";
+    //             $this->submenu = "listar";
+                
+    //             break;
+                
+
+    //     }
+
+    // }    
+
+
+                    //todo sobre los nihcos en el admin
+    // public function identificarMenu() {
+        
+        
+    //     $this->menu = $_SESSION['menu'];
+    //     $this->filtro = $_GET['filtro'];
+        
+    //     switch($this->filtro){
+    //         case 1:
+    //             $this->titulo = "Ver nichos";
+    //             $this->submenu = "nichos";
+    //             $this->filtrarNichos();
+    //             require_once "vista/users/admin/index.php"; 
+
+    //         break;
+    //         case 2:
+    //             $this->titulo = "Solicitudes de ocupaciones";
+    //             $this->submenu = "ocupaciones";
+    //             require_once "vista/users/admin/index.php"; 
+        
+    //         break;
+    //         case 3:
+    //             $this->titulo = "Solicitudes de exhumaciones";
+    //             $this->submenu = "exhumaciones";
+    //             require_once "vista/users/admin/index.php"; 
+                    
+    //                 break;
+                
+    //     }
 
  
-    
 
+    // }
 
+  
 
+  
+ 
 
 }

@@ -4,16 +4,21 @@ class User{
     private $pdo;     //mi objeto 
 
     private $calle_avenida = 0 ; //varchar
-    private $nombres;  //varchar
-    private $apellidos;  //varchar
+    private $nombres1;  //varchar
+    private $nombres2;  //varchar
+    private $apellidos1;  //varchar
+    private $apellidos2;  //varchar
     private $cui;  //varchar
     private $jur_nombre;  //varchar
     private $passwords;  //int (id del equipo)
     private $idRol;  //int (id del equipo)
     private $id;  //int (id del equipo)
-    private $estado;  //int (id del equipo)
+    private $mail;  //int (id del equipo)
     private $jur_correo;  //int (id del equipo)
-    
+    private $fecha;    
+    private $munic;    
+
+
     public $lastInsertId;  
     
     public function __CONSTRUCT(){
@@ -57,35 +62,59 @@ class User{
     public function get_cui(): ?int{ 
         return $this->cui;
     }
-    //nombre
-    public function set_nombres(string $nombres){
-            $this->nombres = $nombres;
+    //nombre++++++++++
+    public function set_nombres1(string $nombres){
+            $this->nombres1 = $nombres;
     }
-    public function get_nombres(): ?string{ 
-        return $this->nombres;
+    public function get_nombres1(): ?string{ 
+        return $this->nombres1;
     }
+
+    public function set_nombres2(string $nombres){
+            $this->nombres2 = $nombres;
+    }
+    public function get_nombres2(): ?string{ 
+        return $this->nombres2;
+    }
+    
     //apellidos
-    public function set_apellidos(string $apellidos){
-            $this->apellidos = $apellidos;
+    public function set_apellidos1(string $apellidos){
+            $this->apellidos1 = $apellidos;
     }
-    public function get_apellidos(): ?string{ 
-        return $this->apellidos;
+    public function get_apellidos1(): ?string{ 
+        return $this->apellidos1;
     }
+    public function set_apellidos2(string $apellidos){
+            $this->apellidos2 = $apellidos;
+    }
+    public function get_apellidos2(): ?string{ 
+        return $this->apellidos2;
+    }
+
+
+
+
         //calle_avenida
-    public function set_calle_avenida(int $calle_avenida){
+    public function setDirr(String $calle_avenida){
         $this->calle_avenida = $calle_avenida;
     }
-    public function get_calle_avenida(): ?int{ 
+    public function getDirr(): ?String{ 
         return $this->calle_avenida;
+    }
+    public function setMunic(int $calle_avenida){
+        $this->munic = $calle_avenida;
+    }
+    public function getMunic(): ?int{ 
+        return $this->munic;
     }
     
     
         //estado
-    public function set_estado(string $estado){
-            $this->estado = $estado;
+    public function set_mail(string $estado){
+            $this->mail = $estado;
     }
-    public function get_estado(): ?string{ 
-        return $this->estado;
+    public function get_mail(): ?string{ 
+        return $this->mail;
     }
         
  
@@ -100,6 +129,16 @@ class User{
     
 
 
+
+
+    public function setFecha($fecha){
+        $this->fecha = new DateTime($fecha);
+    }
+ 
+    public function getFecha() { 
+        return $this->fecha->format('Y-m-d');
+    }
+    
 
 
 
@@ -122,6 +161,24 @@ class User{
 
         }catch(PDOException $e){
             echo "Error al insertar publicacion: " . $e->getMessage();
+            exit;
+            // header("location:?c=user");
+        }
+ 
+    }
+    public function darTabla($tabla) {
+
+        try{
+            // retornar las calles
+            $sql = "SELECT * FROM " .  $tabla . ";" ;
+            
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute();
+            
+            return $stmt->fetchAll(PDO::FETCH_OBJ);
+
+        }catch(PDOException $e){
+            echo "Error al dar tabla: " . $e->getMessage();
             exit;
             // header("location:?c=user");
         }
@@ -157,24 +214,24 @@ class User{
         try{
             // retornar las calles
             $sql = "
-            SELECT 
-                n.*, 
-                tn.tipo AS tipo_nicho,
-                c.numero AS numero_calle,
-                a.numero AS numero_avenida,
-                j.estado AS estado_nicho
-            FROM 
-                nicho n
-            LEFT JOIN 
-                tipo_nicho tn ON n.id_tipo_nicho = tn.id
-            LEFT JOIN 
-                estado_nicho j ON n.id_estado_nicho = j.id
-            LEFT JOIN 
-                ubicacion_nicho u ON n.id_ubicacion = u.id
-            LEFT JOIN 
-                calle c ON u.id_calle = c.id
-            LEFT JOIN 
-                avenida a ON u.id_avenida = a.id;
+                SELECT 
+                    n.*, 
+                    tn.tipo AS tipo_nicho,
+                    c.numero AS numero_calle,
+                    a.numero AS numero_avenida,
+                    j.estado AS estado_nicho
+                FROM 
+                    nicho n
+                LEFT JOIN 
+                    tipo_nicho tn ON n.id_tipo_nicho = tn.id
+                LEFT JOIN 
+                    estado_nicho j ON n.id_estado_nicho = j.id
+                LEFT JOIN 
+                    ubicacion_nicho u ON n.id_ubicacion = u.id
+                LEFT JOIN 
+                    calle c ON u.id_calle = c.id
+                LEFT JOIN 
+                    avenida a ON u.id_avenida = a.id;
 
             
             ";
@@ -255,40 +312,50 @@ class User{
 
 
     public function insertUsuario($user) {
+
         try {
             // $sql = "INSERT INTO usuario (id_rol, user, password) VALUES (:id_rol, :user, :password)";
-
-            $sql = "INSERT INTO usuario (id_cui, username, password, nombres, apellidos, id_rol, id_estado) 
-            VALUES (:cui, :user, :password, :nombres, :apellidos,  :id_rol, :id_estado)";
+ 
+          
+            $sql = "CALL insertar_persona_y_usuario(
+                :pNombre, :sNombre, :pApe, :sApe,
+                :cui, :fecha, :dirr, :munic,
+                :mail, :pasw, :rol
+            );
+            ";
      
             $stmt = $this->pdo->prepare($sql);
-             
-
-            // Vinculando los parámetros
-            $stmt->bindParam(':cui', $user->get_cui(), PDO::PARAM_INT);
-            $stmt->bindParam(':user', $user->getNombre(), PDO::PARAM_STR);
-
-            // $stmt->bindParam(':password', $user->getpasswords(), PDO::PARAM_STR);
-
+  
+            
             $passwordRaw = $user->getpasswords();
+            
+            $stmt->bindParam(':pNombre', $user->get_nombres1(), PDO::PARAM_STR);
+            $stmt->bindParam(':sNombre', $user->get_nombres2(), PDO::PARAM_STR);
+            $stmt->bindParam(':pApe', $user->get_apellidos1(), PDO::PARAM_STR);
+            $stmt->bindParam(':sApe', $user->get_apellidos2(), PDO::PARAM_STR);
+            
+            $stmt->bindParam(':cui', $user->get_cui(), PDO::PARAM_INT);
+            $stmt->bindParam(':fecha', $user->getFecha(), PDO::PARAM_STR);
+            $stmt->bindParam(':dirr', $user->getDirr(), PDO::PARAM_STR);
+            $stmt->bindParam(':munic', $user->getMunic(), PDO::PARAM_STR);
+            
+            $stmt->bindParam(':mail', $user->get_mail(), PDO::PARAM_STR);
+            
+            
             $hashedPassword = password_hash($passwordRaw, PASSWORD_DEFAULT);
-            $stmt->bindParam(':password', $hashedPassword, PDO::PARAM_STR);
-
-
-            $stmt->bindParam(':nombres', $user->get_nombres(), PDO::PARAM_STR);
-            $stmt->bindParam(':apellidos', $user->get_apellidos(), PDO::PARAM_STR);
-            // $stmt->bindParam(':calle_avenida', $user->get_calle_avenida(), PDO::PARAM_STR);
-            $stmt->bindParam(':id_rol', $user->getIdRol(), PDO::PARAM_INT);
-            $stmt->bindParam(':id_estado', $user->get_estado(), PDO::PARAM_INT);
+            $stmt->bindParam(':pasw', $hashedPassword, PDO::PARAM_STR);
             
-            
+            $stmt->bindParam(':rol', $user->getIdRol(), PDO::PARAM_INT);
             // Ejecutar la consulta
             $stmt->execute();
-            $lastInsertId = $this->pdo->lastInsertId();
 
-            return $lastInsertId;
+            // $lastInsertId = $this->pdo->lastInsertId();
+
+            return "yes";
       
         } catch (PDOException $e) {
+            //   var_dump("tryy: " . $e->getMessage()); exit;
+
             return $e;
             echo "Error al insertar usuario: " . $e->getMessage();
             exit;
@@ -416,21 +483,18 @@ public function viewUsers(){
 
 public function delete_user($id_user){
     try{
-        $sql = "DELETE FROM usuario
-                where id_cui =:id_user
+        $sql = "DELETE FROM user
+                where id = :id_user
                 ;
         ";
         $stmt = $this->pdo->prepare($sql);
         $stmt->bindParam(':id_user', $id_user);
         
         // Ejecutar la consulta
-        $stmt->execute();
+        $stmt->execute(); 
 
-        // header("location:?c=user");
-
-        // echo "Evento insertado correctamente!";
     }catch(PDOException $e){
-        echo "Error al actualizar Publicaciones(AceptarRechazar): " . $e->getMessage();
+        echo "Error al actualizar eliminar user " . $e->getMessage();
         exit;
         // header("location:?c=user");
     }

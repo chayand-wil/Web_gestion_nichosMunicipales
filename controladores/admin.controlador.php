@@ -39,6 +39,9 @@ class adminControlador{
     private $nichoEncontrado;
 
  
+    private $municipios;
+        private $municipioDef = 1;
+
     private $calles;
     private $avenidas;
     private $intersecciones;
@@ -80,6 +83,7 @@ class adminControlador{
                 if($this->menu == 'nichos'){
                     $this->filtrarNichos();
                 }
+
 
                 require_once "vista/users/admin/index.php";
                 
@@ -139,6 +143,11 @@ class adminControlador{
 
 
   
+    public function cargarMunicipioEtc(){
+        $this->municipios = $this->modelo2->darTabla("municipio");
+
+    }
+
     public function cargarCallesAv_nichos(){
         $this->losNichos = $this->modelo2->darNichos();
 
@@ -287,20 +296,9 @@ class adminControlador{
     }
     
 
-    public function eliminarUserC(){ 
- 
-        $this->identificarFiltros();
-        $id_user = $_GET['id_user'];
-        
-        $this->modelo2->delete_user($id_user);
 
 
-        require_once "vista/users/admin/index.php"; 
-    }
-
-
-
-
+                                                            //ADMIN 
     public function identificarFiltros() {
         $this->filtro = $_GET['filtro'];
 
@@ -308,6 +306,7 @@ class adminControlador{
             case 1:
                 $this->titulo = "Agregar un usuario";
                 $this->submenu = "agregar";
+                $this->cargarMunicipioEtc();
             break;
             case 2:
                 $this->titulo = "Usuarios disponibles";
@@ -319,6 +318,8 @@ class adminControlador{
         }
 
     }
+
+
                     //todo sobre los nihcos en el admin
     public function identificarMenu() {
         
@@ -352,6 +353,20 @@ class adminControlador{
  
 
     }
+
+    public function eliminarUserC(){ 
+ 
+        $this->identificarFiltros();
+        $id_user = $_GET['id_user'];
+        
+        $this->modelo2->delete_user($id_user);
+        $this->titulo = "Usuarios disponibles";
+        $this->submenu = "listar";
+
+        require_once "vista/users/admin/index.php"; 
+    }
+
+
 
 
  

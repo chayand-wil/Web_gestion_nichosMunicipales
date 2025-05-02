@@ -1,8 +1,5 @@
 <?php session_start(); ?>
 
-
-<?php include '/opt/lampp/htdocs/Web_gestion_nichosMunicipales/vista/users/header.php' ?>
-
  
 <!DOCTYPE html>
 <html lang="es">
@@ -105,12 +102,24 @@
 <?php    include 'vista/users/admin/header.php'; ?>
 
 
-<?php if (isset($_SESSION['mensaje_registro'])): ?>
-        <div class="mensaje-registro">
-            <p><?= htmlspecialchars($_SESSION['mensaje_registro']) ?></p>
+<?php if (isset($_SESSION['mensaje_registro_succes'])): ?>
+        <div class="mensaje-registro'">
+            <p><?= htmlspecialchars($_SESSION['mensaje_registro_succes']) ?></p>
         </div>
-        <?php unset($_SESSION['mensaje_registro']); // Eliminar el mensaje después de mostrarlo ?>
+        <?php unset($_SESSION['mensaje_registro_succes']); // Eliminar el mensaje después de mostrarlo ?>
 <?php endif; ?>
+
+
+<?php if (isset($_SESSION['mensaje_registro_error'])): ?>
+        <div class="mensaje-registro">
+            <p><?= htmlspecialchars($_SESSION['mensaje_registro_error']) ?></p>
+        </div>
+        <?php unset($_SESSION['mensaje_registro_error']); // Eliminar el mensaje después de mostrarlo ?>
+<?php endif; ?>
+
+
+
+
 
 <br>
 <br>
